@@ -9,8 +9,7 @@ One page per character (Lazlo, Vasha, Ivan Maddock), live from the Dicegeist Sup
 3. Supabase SSL cert -> Windows trust store (one time, see [SSL certificate](#ssl-certificate)).
 4. Supabase Dashboard -> **Connect** -> Session pooler: copy host. Power BI Desktop -> Transform data -> paste each block of `03_power_query.m` as its own Blank Query; set `PgHost` to `<host>:5432`.
 5. First refresh asks for credentials -> **Database** tab: user `powerbi_reader.xrwydjehpwaaxeexneid`, password from step 2.
-6. Model view: relationships (below). Modeling -> New parameter -> Numeric range: `Assumed AC` (5-30, default 14), `Assumed DC` (5-30, default 13). Paste measures from `04_measures.dax`.
-7. Build page 1 per [Page layout](#page-layout), duplicate twice, change page filter.
+6. Model, sliders, measures, page build: follow `WALKTHROUGH.md` parts C to F.
 
 ## Files
 
@@ -19,7 +18,9 @@ One page per character (Lazlo, Vasha, Ivan Maddock), live from the Dicegeist Sup
 | `01_reporting_views.sql` | `reporting` schema: 5 flat views, all derived columns precomputed |
 | `02_powerbi_reader_role.sql` | read-only login, `reporting` only |
 | `03_power_query.m` | connection parameter + 5 queries |
-| `04_measures.dax` | 59 measures, grouped by outline |
+| `04_measures.dax` | 59 measures, grouped by outline, with breakdown comments |
+| `05_measures_paste_once.dax` | same 59 measures, one paste into DAX query view |
+| `WALKTHROUGH.md` | click-by-click build |
 
 ## Data model
 

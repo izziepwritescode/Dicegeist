@@ -1,0 +1,377 @@
+// All 59 Dicegeist measures in one paste, for Power BI DAX query view
+// Usage Syntax: DAX query view (left sidebar, 4th icon) -> New query -> paste all -> Run -> "Update model: Add 59 new measures"
+//   needs first: tables loaded, _Measures table, what-if params Assumed AC + Assumed DC (they create [Assumed AC Value] / [Assumed DC Value])
+//   generated from 04_measures.dax; edit that file, not this one
+//   formats are not set by a query -> set in Model view afterwards (WALKTHROUGH.md step 8)
+
+DEFINE
+
+//--------------------------------------------------------------------------------------------------------------
+// Volume
+//--------------------------------------------------------------------------------------------------------------
+
+//row count in current filter (Excel: COUNTIFS over the page's filters)
+//#format: whole number, thousands separator
+MEASURE '_Measures'[Rolls] = COUNTROWS ( RollsFact )
+
+//#format: whole number
+MEASURE '_Measures'[Play Sessions] = DISTINCTCOUNT ( RollsFact[play_session_no] ) //per character; pages are filtered to one
+
+//#format: 0.0
+MEASURE '_Measures'[Rolls per Session] = DIVIDE ( [Rolls], [Play Sessions] ) //DIVIDE -> blank instead of #DIV/0!
+
+//COUNT skips blanks -> only rolls that had a d20
+//#format: whole number
+MEASURE '_Measures'[d20 Rolls] = COUNT ( RollsFact[natural_d20] )
+
+
+//--------------------------------------------------------------------------------------------------------------
+// d20 luck
+//--------------------------------------------------------------------------------------------------------------
+
+//kept d20 face (advantage -> higher die)
+//#format: 0.00
+MEASURE '_Measures'[Avg Natural d20] = AVERAGE ( RollsFact[natural_d20] )
+
+//what a fair die averages for this mix of normal / adv / dis rolls
+//#format: 0.00
+MEASURE '_Measures'[Expected d20] = AVERAGE ( RollsFact[expected_natural_d20] )
+
+//+ = luckier than a fair die, - = unluckier
+//#format: +0.00;-0.00;0.00
+MEASURE '_Measures'[d20 Luck] = [Avg Natural d20] - [Expected d20]
+
+//luck in standard errors; beyond +/-2 = rare for a fair die (about 1 in 20)
+//#format: +0.0;-0.0;0.0
+MEASURE '_Measures'[Luck Z] =
+VAR n = [d20 Rolls]
+RETURN
+    DIVIDE ( [d20 Luck], 5.766 / SQRT ( n ) ) //standard error of a mean = sd / sqrt(n)
+
+//#format: whole number
+MEASURE '_Measures'[Nat 20s] = CALCULATE ( [Rolls], RollsFact[is_nat20] = TRUE () ) //CALCULATE = measure under an extra filter (Excel: COUNTIFS extra criterion)
+
+//#format: whole number
+MEASURE '_Measures'[Nat 1s] = CALCULATE ( [Rolls], RollsFact[is_nat1] = TRUE () )
+
+//fair die, normal rolls -> 5%; advantage pushes it up
+//#format: 0.0%
+MEASURE '_Measures'[Nat 20 Rate] = DIVIDE ( [Nat 20s], [d20 Rolls] )
+
+//#format: 0.0%
+MEASURE '_Measures'[Nat 1 Rate] = DIVIDE ( [Nat 1s], [d20 Rolls] )
+
+//>1 = more crits than fumbles
+//#format: 0.00
+MEASURE '_Measures'[Crit Ratio] = DIVIDE ( [Nat 20s], [Nat 1s] )
+
+//share of the visual's total; for the kept-d20 histogram (axis = natural_d20)
+//#format: 0.0%
+MEASURE '_Measures'[Rolls Share] =
+DIVIDE (
+    [Rolls],
+    CALCULATE ( [Rolls], REMOVEFILTERS ( RollsFact[natural_d20] ) ) //denominator ignores the bar's own face value
+)
+
+
+//--------------------------------------------------------------------------------------------------------------
+// Damage
+//--------------------------------------------------------------------------------------------------------------
+
+//sum of damage roll totals (rolled, not confirmed dealt)
+//#format: whole number, thousands separator
+MEASURE '_Measures'[Damage Rolled] = CALCULATE ( SUM ( RollsFact[total] ), RollsFact[category] = "damage" )
+
+//spell attacks (Eldritch Blast) and Divine Smite count as spell damage
+//#format: whole number, thousands separator
+MEASURE '_Measures'[Spell Damage] = CALCULATE ( [Damage Rolled], RollsFact[damage_source] = "Spell" )
+
+//#format: 0%
+MEASURE '_Measures'[Spell Damage Share] = DIVIDE ( [Spell Damage], [Damage Rolled] )
+
+//#format: 0.0
+MEASURE '_Measures'[Avg Damage Roll] = CALCULATE ( AVERAGE ( RollsFact[total] ), RollsFact[category] = "damage" )
+
+//#format: whole number
+MEASURE '_Measures'[Biggest Hit] = CALCULATE ( MAX ( RollsFact[total] ), RollsFact[category] = "damage" )
+
+//damage dice actual / average; 105% = dice ran 5% hot. modifiers excluded
+//#format: 0.0%
+MEASURE '_Measures'[Damage Dice Luck] =
+CALCULATE (
+    DIVIDE ( SUM ( RollsFact[kept_dice_sum] ), SUM ( RollsFact[kept_dice_expected] ) ),
+    RollsFact[category] = "damage"
+)
+
+
+//--------------------------------------------------------------------------------------------------------------
+// Attacks
+//--------------------------------------------------------------------------------------------------------------
+
+//#format: whole number
+MEASURE '_Measures'[Attack Rolls] = CALCULATE ( [Rolls], RollsFact[category] = "attack" )
+
+//only attacks with a known target AC (Foundry); blank for Roll20 -> card shows "(Blank)", set to "n/a"
+//#format: 0%
+MEASURE '_Measures'[Hit Rate (known AC)] =
+VAR hits  = CALCULATE ( [Rolls], RollsFact[category] = "attack", RollsFact[is_success] = TRUE () )
+VAR known = CALCULATE ( [Rolls], RollsFact[category] = "attack", NOT ISBLANK ( RollsFact[is_success] ) )
+RETURN
+    DIVIDE ( hits, known )
+
+
+//--------------------------------------------------------------------------------------------------------------
+// Healing + death saves (Roll20 excluded: incomplete source data)
+//--------------------------------------------------------------------------------------------------------------
+
+//#format: whole number
+MEASURE '_Measures'[Healing Rolled] =
+CALCULATE (
+    SUM ( RollsFact[total] ),
+    RollsFact[category] = "healing",
+    RollsFact[counts_for_healing] = TRUE ()
+)
+
+//#format: whole number
+MEASURE '_Measures'[Death Saves] =
+CALCULATE ( [Rolls], RollsFact[category] = "death_save", RollsFact[counts_for_death_saves] = TRUE () )
+
+//success + nat 20 over all counted saves
+//#format: 0%
+MEASURE '_Measures'[Death Save Success Rate] =
+DIVIDE (
+    CALCULATE (
+        [Death Saves],
+        RollsFact[death_save_result] IN { "Success", "Nat 20 (back up)" } //IN {list} = Excel OR() over values
+    ),
+    [Death Saves]
+)
+
+//card subtitle; explains a blank instead of showing 0
+MEASURE '_Measures'[Death Save Note] =
+IF (
+    ISBLANK ( [Death Saves] ),
+    "Roll20 saves excluded (incomplete)",
+    FORMAT ( [Death Saves], "0" ) & " saves, " & FORMAT ( [Death Save Success Rate], "0%" ) & " passed"
+)
+
+
+//--------------------------------------------------------------------------------------------------------------
+// Dice fairness
+//--------------------------------------------------------------------------------------------------------------
+
+//share of each face within its die size; axis = DiceFact[face], filter die = "d20"
+//#format: 0.0%
+MEASURE '_Measures'[Face Share] =
+DIVIDE (
+    COUNTROWS ( DiceFact ),
+    CALCULATE ( COUNTROWS ( DiceFact ), REMOVEFILTERS ( DiceFact[face] ) )
+)
+
+//fair die -> 1 / sides (d20 = 5%)
+//#format: 0.0%
+MEASURE '_Measures'[Expected Face Share] = DIVIDE ( 1, MAX ( DiceFact[sides] ) )
+
+//#format: whole number
+MEASURE '_Measures'[Cursed Dice] = CALCULATE ( COUNTROWS ( DieFairness ), DieFairness[verdict] = "Cursed (p < 0.05)" ) + 0 //+0 -> 0 not blank
+
+
+//--------------------------------------------------------------------------------------------------------------
+// Headline text (for cards)
+//--------------------------------------------------------------------------------------------------------------
+
+//TOPN(1, list, ranking measure) = MAXIFS lookup; CONCATENATEX joins ties with ", "
+MEASURE '_Measures'[Most Rolled Skill] =
+CALCULATE (
+    CONCATENATEX ( TOPN ( 1, VALUES ( RollsFact[check_name] ), [Rolls] ), RollsFact[check_name], ", " ),
+    RollsFact[category] = "skill_check"
+)
+
+//highest avg natural d20, skills with >= 5 rolls
+MEASURE '_Measures'[Luckiest Skill] =
+VAR skills =
+    CALCULATETABLE (
+        FILTER (
+            ADDCOLUMNS ( VALUES ( RollsFact[check_name] ), "@n", [Rolls], "@avg", [Avg Natural d20] ), //one row per skill + 2 calc cols
+            [@n] >= 5
+        ),
+        RollsFact[category] = "skill_check"
+    )
+RETURN
+    CONCATENATEX (
+        TOPN ( 1, skills, [@avg], DESC ),
+        RollsFact[check_name] & " (" & FORMAT ( [@avg], "0.0" ) & ")",
+        ", "
+    )
+
+//same, lowest avg
+MEASURE '_Measures'[Unluckiest Skill] =
+VAR skills =
+    CALCULATETABLE (
+        FILTER (
+            ADDCOLUMNS ( VALUES ( RollsFact[check_name] ), "@n", [Rolls], "@avg", [Avg Natural d20] ),
+            [@n] >= 5
+        ),
+        RollsFact[category] = "skill_check"
+    )
+RETURN
+    CONCATENATEX (
+        TOPN ( 1, skills, [@avg], ASC ),
+        RollsFact[check_name] & " (" & FORMAT ( [@avg], "0.0" ) & ")",
+        ", "
+    )
+
+//most-rolled spell across attack, damage and healing rows
+MEASURE '_Measures'[Signature Spell] =
+CALCULATE (
+    CONCATENATEX ( TOPN ( 1, VALUES ( RollsFact[spell_name] ), [Rolls] ), RollsFact[spell_name], ", " ),
+    NOT ISBLANK ( RollsFact[spell_name] )
+)
+
+//play night with highest avg natural d20, >= 5 d20 rolls
+MEASURE '_Measures'[Best Night] =
+VAR nights = FILTER ( PlaySessions, PlaySessions[d20_count] >= 5 )
+RETURN
+    CONCATENATEX (
+        TOPN ( 1, nights, PlaySessions[avg_natural_d20], DESC ),
+        FORMAT ( PlaySessions[play_date], "d mmm yyyy" ) & " (" & FORMAT ( PlaySessions[avg_natural_d20], "0.0" ) & ")",
+        ", "
+    )
+
+MEASURE '_Measures'[Worst Night] =
+VAR nights = FILTER ( PlaySessions, PlaySessions[d20_count] >= 5 )
+RETURN
+    CONCATENATEX (
+        TOPN ( 1, nights, PlaySessions[avg_natural_d20], ASC ),
+        FORMAT ( PlaySessions[play_date], "d mmm yyyy" ) & " (" & FORMAT ( PlaySessions[avg_natural_d20], "0.0" ) & ")",
+        ", "
+    )
+
+
+//--------------------------------------------------------------------------------------------------------------
+// Requested metrics (Izzie, 2026-10-06)
+// needs 2 what-if parameters first: Modeling -> New parameter -> Numeric range
+//   "Assumed AC": min 5, max 30, increment 1, default 14 -> creates table + measure [Assumed AC Value]
+//   "Assumed DC": min 5, max 30, increment 1, default 13 -> creates table + measure [Assumed DC Value]
+// logs carry no save DC at all, and no AC for Roll20 attacks -> pass / hit uses the slider value instead
+//--------------------------------------------------------------------------------------------------------------
+
+//attack hit: nat 20 always hits, nat 1 always misses, else total >= AC (real AC when logged, slider when not)
+//#format: whole number
+MEASURE '_Measures'[Attack Hits] =
+VAR ac = [Assumed AC Value]
+RETURN
+    CALCULATE (
+        COUNTROWS ( RollsFact ),
+        RollsFact[category] = "attack",
+        FILTER (
+            RollsFact,                                   //row-by-row test (Excel: SUMPRODUCT over a condition)
+            RollsFact[natural_d20] = 20
+                || ( RollsFact[natural_d20] <> 1
+                     && RollsFact[total] >= COALESCE ( RollsFact[target_value], ac ) ) //COALESCE = first non-blank (Excel: IF(ISBLANK(a), b, a))
+        )
+    )
+
+//#format: whole number
+MEASURE '_Measures'[Attack Misses] = [Attack Rolls] - [Attack Hits]
+
+//#format: 0%
+MEASURE '_Measures'[Attack Hit Rate] = DIVIDE ( [Attack Hits], [Attack Rolls] )
+
+//#format: 0%
+MEASURE '_Measures'[Attack Miss Rate] = DIVIDE ( [Attack Misses], [Attack Rolls] )
+
+//how many hits used a real AC vs the slider; card subtitle
+MEASURE '_Measures'[Attack AC Note] =
+VAR known = CALCULATE ( [Rolls], RollsFact[category] = "attack", NOT ISBLANK ( RollsFact[target_value] ) )
+RETURN
+    FORMAT ( known + 0, "0" ) & " of " & FORMAT ( [Attack Rolls], "0" ) & " attacks vs real AC, rest vs AC "
+        & FORMAT ( [Assumed AC Value], "0" )
+
+//#format: whole number, thousands separator
+MEASURE '_Measures'[Weapon Damage] = CALCULATE ( [Damage Rolled], RollsFact[damage_source] = "Weapon / other" )
+
+//#format: 0%
+MEASURE '_Measures'[Weapon Damage Share] = DIVIDE ( [Weapon Damage], [Damage Rolled] )
+
+//share of damage per type; axis / legend = RollsFact[damage_type]
+//#format: 0.0%
+MEASURE '_Measures'[Damage Type Share] =
+DIVIDE ( [Damage Rolled], CALCULATE ( [Damage Rolled], REMOVEFILTERS ( RollsFact[damage_type] ) ) )
+
+//#format: 0.0
+MEASURE '_Measures'[Avg Spell Damage Roll] = CALCULATE ( [Avg Damage Roll], RollsFact[damage_source] = "Spell" )
+
+//#format: 0.0
+MEASURE '_Measures'[Avg Weapon Damage Roll] = CALCULATE ( [Avg Damage Roll], RollsFact[damage_source] = "Weapon / other" )
+
+//#format: whole number
+MEASURE '_Measures'[Saving Throws] = CALCULATE ( [Rolls], RollsFact[category] = "saving_throw" )
+
+//save pass: total >= assumed DC (no DCs in any log)
+//#format: whole number
+MEASURE '_Measures'[Save Passes] =
+VAR dc = [Assumed DC Value]
+RETURN
+    CALCULATE (
+        COUNTROWS ( RollsFact ),
+        RollsFact[category] = "saving_throw",
+        FILTER ( RollsFact, RollsFact[total] >= dc )
+    )
+
+//#format: whole number
+MEASURE '_Measures'[Save Fails] = [Saving Throws] - [Save Passes]
+
+//by type: put RollsFact[ability_name] on the axis
+//#format: 0%
+MEASURE '_Measures'[Save Pass Rate] = DIVIDE ( [Save Passes], [Saving Throws] )
+
+//#format: 0%
+MEASURE '_Measures'[Save Fail Rate] = DIVIDE ( [Save Fails], [Saving Throws] )
+
+//#format: 0.0
+MEASURE '_Measures'[Avg Save Total] = CALCULATE ( AVERAGE ( RollsFact[total] ), RollsFact[category] = "saving_throw" )
+
+//death saves per play session (Roll20 excluded via [Death Saves])
+//#format: 0.00
+MEASURE '_Measures'[Death Saves per Session] = DIVIDE ( [Death Saves], [Play Sessions] )
+
+//#format: whole number
+MEASURE '_Measures'[Death Save Fails] =
+CALCULATE ( [Death Saves], RollsFact[death_save_result] IN { "Fail", "Nat 1 (two fails)" } )
+
+//#format: 0%
+MEASURE '_Measures'[Death Save Fail Rate] = DIVIDE ( [Death Save Fails], [Death Saves] )
+
+//healing rolls (= heals cast), Roll20 excluded
+//#format: whole number
+MEASURE '_Measures'[Healing Casts] =
+CALCULATE ( [Rolls], RollsFact[category] = "healing", RollsFact[counts_for_healing] = TRUE () )
+
+//1 cast = 1 spell attack roll (per beam / ray), else 1 damage / healing roll
+//#format: whole number
+MEASURE '_Measures'[Spell Casts] = CALCULATE ( [Rolls], RollsFact[is_spell_cast] = TRUE () )
+
+//% by level: axis = RollsFact[spell_level_filled] (0 = cantrip)
+//#format: 0.0%
+MEASURE '_Measures'[Spell Cast Share] =
+DIVIDE ( [Spell Casts], CALCULATE ( [Spell Casts], REMOVEFILTERS ( RollsFact[spell_level_filled] ) ) )
+
+//rolls tied to an ability: checks, skills (via their ability), saves, initiative (DEX)
+//#format: whole number
+MEASURE '_Measures'[Ability Rolls] = CALCULATE ( [Rolls], NOT ISBLANK ( RollsFact[ability_code] ) )
+
+//abilities array: matrix columns = RollsFact[ability_code] (sort by ability_order)
+//REMOVEFILTERS lists the sort column too; Power BI groups by it behind the scenes
+//#format: 0.0%
+MEASURE '_Measures'[Ability Share] =
+DIVIDE (
+    [Ability Rolls],
+    CALCULATE (
+        [Ability Rolls],
+        REMOVEFILTERS ( RollsFact[ability_code], RollsFact[ability_name], RollsFact[ability_order] )
+    )
+)
+
+EVALUATE
+    { [Rolls] }   //any small result; the run just has to succeed so the update button appears
