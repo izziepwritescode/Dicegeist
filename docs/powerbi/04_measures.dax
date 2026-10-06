@@ -1,0 +1,268 @@
+// DAX measures for the Dicegeist character one-pagers
+// Usage Syntax: Home -> Enter data -> name table "_Measures" -> Load; select _Measures -> New measure -> paste one measure
+//   (name = ... through end of its formula), repeat; set Format per the "#format:" note above each
+
+//--------------------------------------------------------------------------------------------------------------
+// Outline
+//   Volume
+//     Rolls / Play Sessions / Rolls per Session / d20 Rolls
+//   d20 luck
+//     Avg Natural d20 / Expected d20 / d20 Luck / Luck Z
+//     Nat 20s / Nat 1s / Nat 20 Rate / Nat 1 Rate / Crit Ratio / Rolls Share
+//   Damage
+//     Damage Rolled / Spell Damage / Spell Damage Share / Avg Damage Roll / Biggest Hit / Damage Dice Luck
+//   Attacks
+//     Attack Rolls / Hit Rate (known AC)
+//   Healing + death saves (Roll20 excluded)
+//     Healing Rolled / Death Saves / Death Save Success Rate / Death Save Note
+//   Dice fairness
+//     Face Share / Expected Face Share / Cursed Dice
+//   Headline text
+//     Most Rolled Skill / Luckiest Skill / Unluckiest Skill / Signature Spell / Best Night / Worst Night
+//
+// Constants
+//   5.766  standard deviation of one d20 = sqrt((20^2 - 1) / 12)
+//   5      minimum rolls before a skill / night counts for luckiest-unluckiest
+//--------------------------------------------------------------------------------------------------------------
+
+
+//--------------------------------------------------------------------------------------------------------------
+// Volume
+//--------------------------------------------------------------------------------------------------------------
+
+//row count in current filter (Excel: COUNTIFS over the page's filters)
+//#format: whole number, thousands separator
+Rolls = COUNTROWS ( RollsFact )
+
+//#format: whole number
+Play Sessions = DISTINCTCOUNT ( RollsFact[play_session_no] ) //per character; pages are filtered to one
+
+//#format: 0.0
+Rolls per Session = DIVIDE ( [Rolls], [Play Sessions] ) //DIVIDE -> blank instead of #DIV/0!
+
+//COUNT skips blanks -> only rolls that had a d20
+//#format: whole number
+d20 Rolls = COUNT ( RollsFact[natural_d20] )
+
+
+//--------------------------------------------------------------------------------------------------------------
+// d20 luck
+//--------------------------------------------------------------------------------------------------------------
+
+//kept d20 face (advantage -> higher die)
+//#format: 0.00
+Avg Natural d20 = AVERAGE ( RollsFact[natural_d20] )
+
+//what a fair die averages for this mix of normal / adv / dis rolls
+//#format: 0.00
+Expected d20 = AVERAGE ( RollsFact[expected_natural_d20] )
+
+//+ = luckier than a fair die, - = unluckier
+//#format: +0.00;-0.00;0.00
+d20 Luck = [Avg Natural d20] - [Expected d20]
+
+//luck in standard errors; beyond +/-2 = rare for a fair die (about 1 in 20)
+//#format: +0.0;-0.0;0.0
+Luck Z =
+VAR n = [d20 Rolls]
+RETURN
+    DIVIDE ( [d20 Luck], 5.766 / SQRT ( n ) ) //standard error of a mean = sd / sqrt(n)
+
+//#format: whole number
+Nat 20s = CALCULATE ( [Rolls], RollsFact[is_nat20] = TRUE () ) //CALCULATE = measure under an extra filter (Excel: COUNTIFS extra criterion)
+
+//#format: whole number
+Nat 1s = CALCULATE ( [Rolls], RollsFact[is_nat1] = TRUE () )
+
+//fair die, normal rolls -> 5%; advantage pushes it up
+//#format: 0.0%
+Nat 20 Rate = DIVIDE ( [Nat 20s], [d20 Rolls] )
+
+//#format: 0.0%
+Nat 1 Rate = DIVIDE ( [Nat 1s], [d20 Rolls] )
+
+//>1 = more crits than fumbles
+//#format: 0.00
+Crit Ratio = DIVIDE ( [Nat 20s], [Nat 1s] )
+
+//share of the visual's total; for the kept-d20 histogram (axis = natural_d20)
+//#format: 0.0%
+Rolls Share =
+DIVIDE (
+    [Rolls],
+    CALCULATE ( [Rolls], REMOVEFILTERS ( RollsFact[natural_d20] ) ) //denominator ignores the bar's own face value
+)
+
+
+//--------------------------------------------------------------------------------------------------------------
+// Damage
+//--------------------------------------------------------------------------------------------------------------
+
+//sum of damage roll totals (rolled, not confirmed dealt)
+//#format: whole number, thousands separator
+Damage Rolled = CALCULATE ( SUM ( RollsFact[total] ), RollsFact[category] = "damage" )
+
+//spell attacks (Eldritch Blast) and Divine Smite count as spell damage
+//#format: whole number, thousands separator
+Spell Damage = CALCULATE ( [Damage Rolled], RollsFact[damage_source] = "Spell" )
+
+//#format: 0%
+Spell Damage Share = DIVIDE ( [Spell Damage], [Damage Rolled] )
+
+//#format: 0.0
+Avg Damage Roll = CALCULATE ( AVERAGE ( RollsFact[total] ), RollsFact[category] = "damage" )
+
+//#format: whole number
+Biggest Hit = CALCULATE ( MAX ( RollsFact[total] ), RollsFact[category] = "damage" )
+
+//damage dice actual / average; 105% = dice ran 5% hot. modifiers excluded
+//#format: 0.0%
+Damage Dice Luck =
+CALCULATE (
+    DIVIDE ( SUM ( RollsFact[kept_dice_sum] ), SUM ( RollsFact[kept_dice_expected] ) ),
+    RollsFact[category] = "damage"
+)
+
+
+//--------------------------------------------------------------------------------------------------------------
+// Attacks
+//--------------------------------------------------------------------------------------------------------------
+
+//#format: whole number
+Attack Rolls = CALCULATE ( [Rolls], RollsFact[category] = "attack" )
+
+//only attacks with a known target AC (Foundry); blank for Roll20 -> card shows "(Blank)", set to "n/a"
+//#format: 0%
+Hit Rate (known AC) =
+VAR hits  = CALCULATE ( [Rolls], RollsFact[category] = "attack", RollsFact[is_success] = TRUE () )
+VAR known = CALCULATE ( [Rolls], RollsFact[category] = "attack", NOT ISBLANK ( RollsFact[is_success] ) )
+RETURN
+    DIVIDE ( hits, known )
+
+
+//--------------------------------------------------------------------------------------------------------------
+// Healing + death saves (Roll20 excluded: incomplete source data)
+//--------------------------------------------------------------------------------------------------------------
+
+//#format: whole number
+Healing Rolled =
+CALCULATE (
+    SUM ( RollsFact[total] ),
+    RollsFact[category] = "healing",
+    RollsFact[counts_for_healing] = TRUE ()
+)
+
+//#format: whole number
+Death Saves =
+CALCULATE ( [Rolls], RollsFact[category] = "death_save", RollsFact[counts_for_death_saves] = TRUE () )
+
+//success + nat 20 over all counted saves
+//#format: 0%
+Death Save Success Rate =
+DIVIDE (
+    CALCULATE (
+        [Death Saves],
+        RollsFact[death_save_result] IN { "Success", "Nat 20 (back up)" } //IN {list} = Excel OR() over values
+    ),
+    [Death Saves]
+)
+
+//card subtitle; explains a blank instead of showing 0
+Death Save Note =
+IF (
+    ISBLANK ( [Death Saves] ),
+    "Roll20 saves excluded (incomplete)",
+    FORMAT ( [Death Saves], "0" ) & " saves, " & FORMAT ( [Death Save Success Rate], "0%" ) & " passed"
+)
+
+
+//--------------------------------------------------------------------------------------------------------------
+// Dice fairness
+//--------------------------------------------------------------------------------------------------------------
+
+//share of each face within its die size; axis = DiceFact[face], filter die = "d20"
+//#format: 0.0%
+Face Share =
+DIVIDE (
+    COUNTROWS ( DiceFact ),
+    CALCULATE ( COUNTROWS ( DiceFact ), REMOVEFILTERS ( DiceFact[face] ) )
+)
+
+//fair die -> 1 / sides (d20 = 5%)
+//#format: 0.0%
+Expected Face Share = DIVIDE ( 1, MAX ( DiceFact[sides] ) )
+
+//#format: whole number
+Cursed Dice = CALCULATE ( COUNTROWS ( DieFairness ), DieFairness[verdict] = "Cursed (p < 0.05)" ) + 0 //+0 -> 0 not blank
+
+
+//--------------------------------------------------------------------------------------------------------------
+// Headline text (for cards)
+//--------------------------------------------------------------------------------------------------------------
+
+//TOPN(1, list, ranking measure) = MAXIFS lookup; CONCATENATEX joins ties with ", "
+Most Rolled Skill =
+CALCULATE (
+    CONCATENATEX ( TOPN ( 1, VALUES ( RollsFact[check_name] ), [Rolls] ), RollsFact[check_name], ", " ),
+    RollsFact[category] = "skill_check"
+)
+
+//highest avg natural d20, skills with >= 5 rolls
+Luckiest Skill =
+VAR skills =
+    CALCULATETABLE (
+        FILTER (
+            ADDCOLUMNS ( VALUES ( RollsFact[check_name] ), "@n", [Rolls], "@avg", [Avg Natural d20] ), //one row per skill + 2 calc cols
+            [@n] >= 5
+        ),
+        RollsFact[category] = "skill_check"
+    )
+RETURN
+    CONCATENATEX (
+        TOPN ( 1, skills, [@avg], DESC ),
+        RollsFact[check_name] & " (" & FORMAT ( [@avg], "0.0" ) & ")",
+        ", "
+    )
+
+//same, lowest avg
+Unluckiest Skill =
+VAR skills =
+    CALCULATETABLE (
+        FILTER (
+            ADDCOLUMNS ( VALUES ( RollsFact[check_name] ), "@n", [Rolls], "@avg", [Avg Natural d20] ),
+            [@n] >= 5
+        ),
+        RollsFact[category] = "skill_check"
+    )
+RETURN
+    CONCATENATEX (
+        TOPN ( 1, skills, [@avg], ASC ),
+        RollsFact[check_name] & " (" & FORMAT ( [@avg], "0.0" ) & ")",
+        ", "
+    )
+
+//most-rolled spell across attack, damage and healing rows
+Signature Spell =
+CALCULATE (
+    CONCATENATEX ( TOPN ( 1, VALUES ( RollsFact[spell_name] ), [Rolls] ), RollsFact[spell_name], ", " ),
+    NOT ISBLANK ( RollsFact[spell_name] )
+)
+
+//play night with highest avg natural d20, >= 5 d20 rolls
+Best Night =
+VAR nights = FILTER ( PlaySessions, PlaySessions[d20_count] >= 5 )
+RETURN
+    CONCATENATEX (
+        TOPN ( 1, nights, PlaySessions[avg_natural_d20], DESC ),
+        FORMAT ( PlaySessions[play_date], "d mmm yyyy" ) & " (" & FORMAT ( PlaySessions[avg_natural_d20], "0.0" ) & ")",
+        ", "
+    )
+
+Worst Night =
+VAR nights = FILTER ( PlaySessions, PlaySessions[d20_count] >= 5 )
+RETURN
+    CONCATENATEX (
+        TOPN ( 1, nights, PlaySessions[avg_natural_d20], ASC ),
+        FORMAT ( PlaySessions[play_date], "d mmm yyyy" ) & " (" & FORMAT ( PlaySessions[avg_natural_d20], "0.0" ) & ")",
+        ", "
+    )
