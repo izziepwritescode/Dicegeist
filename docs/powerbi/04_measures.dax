@@ -19,6 +19,12 @@
 //     Face Share / Expected Face Share / Cursed Dice
 //   Headline text
 //     Most Rolled Skill / Luckiest Skill / Unluckiest Skill / Signature Spell / Best Night / Worst Night
+//   Requested metrics (needs what-if params Assumed AC, Assumed DC)
+//     Attack Hits / Attack Misses / Attack Hit Rate / Attack Miss Rate / Attack AC Note
+//     Weapon Damage / Weapon Damage Share / Damage Type Share / Avg Spell Damage Roll / Avg Weapon Damage Roll
+//     Saving Throws / Save Passes / Save Fails / Save Pass Rate / Save Fail Rate / Avg Save Total
+//     Death Saves per Session / Death Save Fails / Death Save Fail Rate
+//     Healing Casts / Spell Casts / Spell Cast Share / Ability Rolls / Ability Share
 //
 // Constants
 //   5.766  standard deviation of one d20 = sqrt((20^2 - 1) / 12)
@@ -266,3 +272,129 @@ RETURN
         FORMAT ( PlaySessions[play_date], "d mmm yyyy" ) & " (" & FORMAT ( PlaySessions[avg_natural_d20], "0.0" ) & ")",
         ", "
     )
+
+
+//--------------------------------------------------------------------------------------------------------------
+// Requested metrics (Izzie, 2026-10-06)
+// needs 2 what-if parameters first: Modeling -> New parameter -> Numeric range
+//   "Assumed AC": min 5, max 30, increment 1, default 14 -> creates table + measure [Assumed AC Value]
+//   "Assumed DC": min 5, max 30, increment 1, default 13 -> creates table + measure [Assumed DC Value]
+// logs carry no save DC at all, and no AC for Roll20 attacks -> pass / hit uses the slider value instead
+//--------------------------------------------------------------------------------------------------------------
+
+//attack hit: nat 20 always hits, nat 1 always misses, else total >= AC (real AC when logged, slider when not)
+//#format: whole number
+Attack Hits =
+VAR ac = [Assumed AC Value]
+RETURN
+    CALCULATE (
+        COUNTROWS ( RollsFact ),
+        RollsFact[category] = "attack",
+        FILTER (
+            RollsFact,                                   //row-by-row test (Excel: SUMPRODUCT over a condition)
+            RollsFact[natural_d20] = 20
+                || ( RollsFact[natural_d20] <> 1
+                     && RollsFact[total] >= COALESCE ( RollsFact[target_value], ac ) ) //COALESCE = first non-blank (Excel: IF(ISBLANK(a), b, a))
+        )
+    )
+
+//#format: whole number
+Attack Misses = [Attack Rolls] - [Attack Hits]
+
+//#format: 0%
+Attack Hit Rate = DIVIDE ( [Attack Hits], [Attack Rolls] )
+
+//#format: 0%
+Attack Miss Rate = DIVIDE ( [Attack Misses], [Attack Rolls] )
+
+//how many hits used a real AC vs the slider; card subtitle
+Attack AC Note =
+VAR known = CALCULATE ( [Rolls], RollsFact[category] = "attack", NOT ISBLANK ( RollsFact[target_value] ) )
+RETURN
+    FORMAT ( known + 0, "0" ) & " of " & FORMAT ( [Attack Rolls], "0" ) & " attacks vs real AC, rest vs AC "
+        & FORMAT ( [Assumed AC Value], "0" )
+
+//#format: whole number, thousands separator
+Weapon Damage = CALCULATE ( [Damage Rolled], RollsFact[damage_source] = "Weapon / other" )
+
+//#format: 0%
+Weapon Damage Share = DIVIDE ( [Weapon Damage], [Damage Rolled] )
+
+//share of damage per type; axis / legend = RollsFact[damage_type]
+//#format: 0.0%
+Damage Type Share =
+DIVIDE ( [Damage Rolled], CALCULATE ( [Damage Rolled], REMOVEFILTERS ( RollsFact[damage_type] ) ) )
+
+//#format: 0.0
+Avg Spell Damage Roll = CALCULATE ( [Avg Damage Roll], RollsFact[damage_source] = "Spell" )
+
+//#format: 0.0
+Avg Weapon Damage Roll = CALCULATE ( [Avg Damage Roll], RollsFact[damage_source] = "Weapon / other" )
+
+//#format: whole number
+Saving Throws = CALCULATE ( [Rolls], RollsFact[category] = "saving_throw" )
+
+//save pass: total >= assumed DC (no DCs in any log)
+//#format: whole number
+Save Passes =
+VAR dc = [Assumed DC Value]
+RETURN
+    CALCULATE (
+        COUNTROWS ( RollsFact ),
+        RollsFact[category] = "saving_throw",
+        FILTER ( RollsFact, RollsFact[total] >= dc )
+    )
+
+//#format: whole number
+Save Fails = [Saving Throws] - [Save Passes]
+
+//by type: put RollsFact[ability_name] on the axis
+//#format: 0%
+Save Pass Rate = DIVIDE ( [Save Passes], [Saving Throws] )
+
+//#format: 0%
+Save Fail Rate = DIVIDE ( [Save Fails], [Saving Throws] )
+
+//#format: 0.0
+Avg Save Total = CALCULATE ( AVERAGE ( RollsFact[total] ), RollsFact[category] = "saving_throw" )
+
+//death saves per play session (Roll20 excluded via [Death Saves])
+//#format: 0.00
+Death Saves per Session = DIVIDE ( [Death Saves], [Play Sessions] )
+
+//#format: whole number
+Death Save Fails =
+CALCULATE ( [Death Saves], RollsFact[death_save_result] IN { "Fail", "Nat 1 (two fails)" } )
+
+//#format: 0%
+Death Save Fail Rate = DIVIDE ( [Death Save Fails], [Death Saves] )
+
+//healing rolls (= heals cast), Roll20 excluded
+//#format: whole number
+Healing Casts =
+CALCULATE ( [Rolls], RollsFact[category] = "healing", RollsFact[counts_for_healing] = TRUE () )
+
+//1 cast = 1 spell attack roll (per beam / ray), else 1 damage / healing roll
+//#format: whole number
+Spell Casts = CALCULATE ( [Rolls], RollsFact[is_spell_cast] = TRUE () )
+
+//% by level: axis = RollsFact[spell_level_filled] (0 = cantrip)
+//#format: 0.0%
+Spell Cast Share =
+DIVIDE ( [Spell Casts], CALCULATE ( [Spell Casts], REMOVEFILTERS ( RollsFact[spell_level_filled] ) ) )
+
+//rolls tied to an ability: checks, skills (via their ability), saves, initiative (DEX)
+//#format: whole number
+Ability Rolls = CALCULATE ( [Rolls], NOT ISBLANK ( RollsFact[ability_code] ) )
+
+//abilities array: matrix columns = RollsFact[ability_code] (sort by ability_order)
+//REMOVEFILTERS lists the sort column too; Power BI groups by it behind the scenes
+//#format: 0.0%
+Ability Share =
+DIVIDE (
+    [Ability Rolls],
+    CALCULATE (
+        [Ability Rolls],
+        REMOVEFILTERS ( RollsFact[ability_code], RollsFact[ability_name], RollsFact[ability_order] )
+    )
+)

@@ -65,7 +65,8 @@ let
                  {"kept_dice_sum", Int64.Type}, {"kept_dice_expected", type number},
                  {"is_nat20", type logical}, {"is_nat1", type logical}, {"is_success", type logical},
                  {"is_spell", type logical}, {"counts_for_death_saves", type logical},
-                 {"counts_for_healing", type logical}, {"is_hidden", type logical}}),
+                 {"counts_for_healing", type logical}, {"is_hidden", type logical},
+                 {"ability_order", Int64.Type}, {"spell_level_filled", Int64.Type}, {"is_spell_cast", type logical}}),
     //sort key so roll_mode shows Disadvantage -> Normal -> Advantage on axes (Column tools -> Sort by column)
     ModeSort = Table.AddColumn(Typed, "roll_mode_sort",
                  each if [roll_mode] = "disadvantage" then 1 else if [roll_mode] = "advantage" then 3 else 2, Int64.Type)
