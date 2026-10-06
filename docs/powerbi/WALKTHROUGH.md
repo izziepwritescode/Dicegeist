@@ -22,10 +22,12 @@ Files referenced live in this folder. Power BI Desktop (Windows), 2024 or newer 
 2. Paste all of `02_powerbi_reader_role.sql`. Replace `<PICK_A_PASSWORD>` (keep the quotes). Save the password somewhere.
 3. **Run**. Expect a 5-row result: `reporting` views, privilege `SELECT`.
 
-### A2. Copy the pooler host
-1. Project home -> **Connect** (top bar).
-2. Method dropdown -> **Session pooler** -> **View parameters**.
-3. Copy **host** only (looks like `aws-0-us-east-1.pooler.supabase.com`; may be `aws-1-...`). Port = 5432.
+### A2. Pooler host
+Likely `aws-1-us-east-1.pooler.supabase.com` (Dicegeist = new us-east-1 project; newer projects sit on the `aws-1` pooler cluster). Fallback `aws-0-us-east-1.pooler.supabase.com`. Port 5432.
+Check it: wrong one -> "Tenant or user not found" at B3 -> swap `aws-1` / `aws-0` in PgHost.
+To read it off Supabase instead (layout varies): project home -> **Connect** -> find the **Session pooler** string (a section, tab, or dropdown depending on version):
+`postgresql://postgres.xrwydjehpwaaxeexneid:[PASSWORD]@aws-1-us-east-1.pooler.supabase.com:5432/postgres`
+host = text between `@` and `:5432`.
 
 ### A3. Trust Supabase's SSL certificate (once per PC)
 1. **Project Settings** -> **Database** -> **SSL Configuration** -> **Download certificate** (`prod-ca-2021.crt`).
