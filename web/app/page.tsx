@@ -61,7 +61,7 @@ export default function Home() {
             <span className="eyebrow">D&amp;D roll analytics</span>
             <LiveBadge status={status} />
           </div>
-          <h1 className="home-title">Dicegeist</h1>
+          <h1 className="home-title">Calculated Strike</h1>
           <motion.hr
             className="home-rule"
             initial={{ scaleX: 0 }}

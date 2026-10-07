@@ -28,9 +28,9 @@ const fraunces = Fraunces({ variable: "--font-fraunces", subsets: ["latin"] });
 //--------------------------------------------------------------------------------------------------------------
 
 export const metadata: Metadata = {
-  title: { default: "Dicegeist", template: "%s · Dicegeist" },
+  title: { default: "Calculated Strike", template: "%s · Calculated Strike" },
   description: "Live D&D dice statistics: every roll from every session, crunched.",
-  openGraph: { title: "Dicegeist", description: "Live D&D dice statistics: every roll from every session, crunched." },
+  openGraph: { title: "Calculated Strike", description: "Live D&D dice statistics: every roll from every session, crunched." },
 };
 
 //--------------------------------------------------------------------------------------------------------------

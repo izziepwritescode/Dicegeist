@@ -285,6 +285,7 @@ Home v2: header, character panels, info panel
 @media (max-width: 560px) {
   .home-head { gap: 16px; align-items: flex-start; }
   .home-die .d20-counter { width: 92px; }
+  .home-title { font-size: clamp(1.5rem, 7.6vw, 2.4rem); letter-spacing: 0.02em; } /* "CALCULATED" must fit beside the die */
   .panel-strip { flex-direction: column; min-height: 0; gap: 34px; }
   .panel-row { flex-direction: column; gap: 10px; }
   .panel-wrap { flex: none !important; }
