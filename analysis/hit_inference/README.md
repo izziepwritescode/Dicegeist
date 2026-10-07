@@ -74,3 +74,35 @@ Verdict:
 - `foundry_attacks` - `originatingMessage` = id of the chat card the attack and damage buttons sit on. `value_counts()` counts damage rolls per card (like COUNTIF on the card id column), then the same ranking hands out hits per card.
 - `slider_hit` - `df.ac.fillna(slider)` = `COALESCE(ac, slider)` in SQL. Same logic as the DAX measure.
 - `summarize` - `best_fit_single_ac` tries AC 8 to 24 and keeps the one that disagrees least with the inferred hits; shows which slider value the damage evidence points to.
+
+## save spells: does "damage after the card" mean the target failed? (2026-10-07)
+No. Counts from the raw logs:
+| spell group | damage on a passed save | rolls | what damage after the card tells you |
+|---|---|---|---|
+| half-on-save: Fireball, Shatter, Spirit Guardians, Moonbeam, Blight, Arms of Hadar, Glyph of Warding, Laeral's Silver Lance | half | Ivan 4, Idris 33, Lazlo 4 | nothing; damage is rolled pass or fail |
+| zero-on-save cantrips: Sacred Flame, Toll the Dead | none | Idris 53 (48 + 5) | maybe "failed", but Foundry rolls damage from the card before the DM rolls the save, and casts with no damage roll are not in the player export -> misses can't be counted |
+| save spells with no damage: Hold Person, Command, Banishment, Hypnotic Pattern... | n/a | Roll20 cards only | nothing; never any damage |
+- AoE: one damage roll covers every target; 12 of Idris's 18 Spirit Guardians rolls have no target listed.
+- Foundry marks each save damage roll `roll.damageOnSave` = `half` / `none`, so the groups above can be split automatically.
+- The DC slider only fed `Save Passes` (the character's OWN saving throws vs an enemy DC). That is a different question from enemy saves vs Izzie's spells. Hiding saving-throw displays already removes the DC slider.
+
+### Applied 2026-10-07 (Izzie: show damage per cast instead)
+`reporting.rolls_fact` gains 2 more columns (migration `reporting_save_damage`):
+- `save_damage_kind` - `half` (damage lands pass or fail) or `none` (damage only on a failed save). From Foundry's `roll.damageOnSave`, else a spell lookup (half: Fireball, Shatter, Spirit Guardians, Moonbeam, Blight, Arms of Hadar, Glyph of Warding, Laeral's Silver Lance; none: Sacred Flame, Toll the Dead).
+- `is_save_damage` - damage rolls only: true when the roll came from a save spell, so no hit or miss can be read from it.
+
+Live counts: Idris 99 save-damage rolls, Ivan 4, Lazlo 5, Vasha 0.
+
+| character | spell | on save | rolls | damage | avg |
+|---|---|---|---|---|---|
+| Idris | Sacred Flame | none | 48 | 492 | 10.3 |
+| Idris | Spirit Guardians | half | 37 | 527 | 14.2 |
+| Idris | Moonbeam | half | 6 | 89 | 14.8 |
+| Idris | Toll the Dead | none | 5 | 66 | 13.2 |
+| Idris | Glyph of Warding / Laeral's Silver Lance / Fireball | half | 1 each | 31 / 18 / 27 | |
+| Ivan | Shatter | half | 3 | 49 | 16.3 |
+| Ivan | Fireball | half | 1 | 30 | 30.0 |
+| Lazlo | Blight | half | 4 | 80 | 20.0 |
+| Lazlo | Shatter | half | 1 | 15 | 15.0 |
+
+Caveat: Spirit Guardians and Moonbeam roll damage once per turn in the aura, not once per cast, so their roll counts are turns, not casts.

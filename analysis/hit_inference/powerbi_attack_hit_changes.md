@@ -63,3 +63,25 @@ Attack Misses / Hit Rate / Miss Rate unchanged (built on Attack Hits).
 
 ## README line to replace (powerbi/README.md "Attack hit rate")
 - Attack hit rate: logged AC where Foundry has a target (Ivan 72, Idris 19); else damage evidence (`attack_outcomes`, see analysis/hit_inference/README.md); `Assumed AC` slider only for attacks with neither (none today).
+
+## save spells: damage per cast (2026-10-07, replaces the DC slider)
+`rolls_fact` also carries `save_damage_kind` (text: `half` / `none`) and `is_save_damage` (logical). Add both to the Power Query `Typed` step:
+```
+{"is_save_damage", type logical}
+```
+Measures:
+```
+//damage from spells whose target makes a saving throw (no hit / miss can be read from these rolls)
+//#format: whole number, thousands separator
+Save Spell Damage = CALCULATE ( [Damage Rolled], RollsFact[is_save_damage] = TRUE () )
+
+//each save-spell damage roll is one use; casts with no damage roll are not in the logs
+//#format: whole number
+Save Spell Damage Rolls = CALCULATE ( [Rolls], RollsFact[is_save_damage] = TRUE () )
+
+//#format: 0.0
+Avg Save Spell Damage = DIVIDE ( [Save Spell Damage], [Save Spell Damage Rolls] )
+```
+Breakdown: `CALCULATE([Damage Rolled], filter)` re-runs the existing damage measure with one extra filter, like adding a criteria pair to SUMIFS. Split by `RollsFact[save_damage_kind]` on an axis to separate "half on a save" from "none on a save".
+
+Also remove from the pages: `Save Passes`, `Save Fails`, `Save Pass Rate`, `Save Fail Rate`, `Saving Throws` and the `Assumed DC` slicer. Izzie's call 2026-10-07: no save-result displays, since no log holds a DC. Keep the rows in the database.
