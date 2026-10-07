@@ -36,6 +36,9 @@ export type CharacterCard = {
   platform: string | null; //roll20 / foundry; from rolls.platform
   bestSkill: SkillPick | null; //highest avg d20, skills with >= MIN_SKILL_ROLLS only
   worstSkill: SkillPick | null;
+  attacks: number | null; //attack rolls; null until character_combat_summary exists
+  spellsCast: number | null;
+  totalDamage: number | null; //sum of damage roll totals
 };
 
 export type SkillPick = { name: string; avgD20: number; rollCount: number };
@@ -104,6 +107,9 @@ export async function fetchCharacters(): Promise<CharacterCard[]> {
   const plats = await Promise.all(
     visible.map((c) => sb.from("rolls").select("platform").eq("character_id", c.id).limit(1).maybeSingle()),
   );
+  //combat totals; error (view not created yet) -> blanks, rest of the page still loads
+  const combat = await sb.from("character_combat_summary").select("character_id, attacks, spells_cast, total_damage");
+  const combatById = new Map((combat.error ? [] : combat.data!).map((r) => [r.character_id as number, r]));
 
   const byId = new Map(sums.data!.map((s) => [s.character_id as number, s])); //lookup like XLOOKUP on character_id
   const names = new Map(lookup.data!.map((s) => [s.code as string, s.name as string]));
@@ -111,6 +117,9 @@ export async function fetchCharacters(): Promise<CharacterCard[]> {
     .map((c, i) => ({
       ...toCard(c, byId.get(c.id)),
       platform: (plats[i].data?.platform as string) ?? null,
+      attacks: num(combatById.get(c.id)?.attacks),
+      spellsCast: num(combatById.get(c.id)?.spells_cast),
+      totalDamage: num(combatById.get(c.id)?.total_damage),
       ...pickSkills(skills.data!.filter((s) => s.character_id === c.id), names),
     }))
     .sort((a, b) => b.rollCount - a.rollCount);
@@ -193,6 +202,9 @@ function toCard(c: any, s?: any): CharacterCard {
     platform: null,
     bestSkill: null,
     worstSkill: null,
+    attacks: null,
+    spellsCast: null,
+    totalDamage: null,
   };
 }
 

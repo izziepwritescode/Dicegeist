@@ -24,7 +24,7 @@ import { AnimatePresence, motion } from "motion/react"; //panel entrance + info 
 import { useRef, useState } from "react";
 import { fetchCharacters, type CharacterCard } from "@/lib/data"; //Supabase reads
 import { useLive } from "@/lib/useLive"; //refresh on new rolls
-import { CountUp, FAIR_D20, LiveBadge, LuckMeter } from "@/components/ui";
+import { CountUp, LiveBadge } from "@/components/ui";
 import { D20Counter } from "@/components/D20Counter"; //hero die with total roll count
 import { paletteFor, themeVars } from "@/lib/themes"; //per-character colour ramps + accents
 
@@ -142,7 +142,7 @@ function PanelGroup({
   );
 }
 
-// tall card, first name written top -> bottom; widens slightly while active
+// tall card, first name written top -> bottom; grows slightly in place while active
 //params: c (CharacterCard); delay (number) - entrance stagger; isActive (boolean); setActive - hover state setter
 //output: JSX.Element
 function Panel({
@@ -171,8 +171,9 @@ function Panel({
     <motion.div
       className="panel-wrap"
       initial={{ opacity: 0, y: 24 }}
-      animate={{ opacity: 1, y: 0, flexGrow: isActive ? 1.3 : 1 }} //flexGrow 1 -> 1.3 = slight widen
-      transition={{ duration: 0.5, ease: EASE, delay: isActive ? 0 : delay, flexGrow: { duration: 0.35, ease: EASE } }}
+      animate={{ opacity: 1, y: 0, scale: isActive ? 1.04 : 1 }} //scale from centre: grows in place, neighbours stay put
+      transition={{ duration: 0.5, ease: EASE, delay: isActive ? 0 : delay, scale: { duration: 0.3, ease: EASE } }}
+      style={{ zIndex: isActive ? 2 : 1 }} //grown panel sits over its neighbours' edges
     >
       <Link
         href={`/character/${c.id}`}
@@ -185,7 +186,10 @@ function Panel({
         aria-label={`${c.name}, ${c.className ?? "character"}, average d20 ${c.avgD20 ?? "n/a"}`}
       >
         <span className="panel-name">{firstName(c.name)}</span>
-        <span className="panel-foot">{c.avgD20?.toFixed(2) ?? "–"}</span>
+        <span className="panel-foot">
+          <span className="panel-class">{c.className ?? "Adventurer"}</span>
+          {c.campaign && <span className="panel-campaign">{c.campaign}</span>}
+        </span>
       </Link>
     </motion.div>
   );
@@ -223,50 +227,47 @@ function NetTotals({ rows }: { rows: CharacterCard[] }) {
   const d20s = rows.reduce((a, r) => a + r.d20Count, 0);
   //weighted average: sum(avg * d20 count) / total d20s, like SUMPRODUCT / SUM
   const avg = d20s ? rows.reduce((a, r) => a + (r.avgD20 ?? 0) * r.d20Count, 0) / d20s : null;
-  const stats: [string, number, number][] = [
-    ["d20s rolled", d20s, 0],
-    ["Average d20", avg ?? 0, 2],
-    ["Natural 20s", rows.reduce((a, r) => a + r.nat20s, 0), 0],
-    ["Natural 1s", rows.reduce((a, r) => a + r.nat1s, 0), 0],
-  ];
+  const sum = (k: "attacks" | "spellsCast" | "totalDamage") =>
+    rows.some((r) => r[k] !== null) ? rows.reduce((a, r) => a + (r[k] ?? 0), 0) : null; //all blank -> blank, not 0
   return (
     <>
       <div className="eyebrow">All characters</div>
       <h2 className="info-title">Net totals</h2>
-      <div className="info-grid">
-        {stats.map(([label, v, dp]) => (
-          <div key={label}>
-            <div className="info-value"><CountUp value={v} decimals={dp} /></div>
-            <div className="info-label">{label}</div>
-          </div>
-        ))}
-      </div>
-      <p className="info-hint">Hover a character to see their luck.</p>
+      <StatGrid
+        stats={[
+          ["d20s rolled", d20s, 0],
+          ["Average d20", avg, 2],
+          ["Natural 20s", rows.reduce((a, r) => a + r.nat20s, 0), 0],
+          ["Natural 1s", rows.reduce((a, r) => a + r.nat1s, 0), 0],
+          ["Attacks", sum("attacks"), 0],
+          ["Spells cast", sum("spellsCast"), 0],
+          ["Total damage", sum("totalDamage"), 0],
+        ]}
+      />
+      <p className="info-hint">Hover a character to see their totals.</p>
     </>
   );
 }
 
-// active character: class/campaign, avg d20 + luck meter, counts, best/worst skill
+// active character: class/campaign, their totals, best/worst skill
 //params: c (CharacterCard)
 //output: JSX.Element
 function CharacterInfo({ c }: { c: CharacterCard }) {
-  const delta = c.avgD20 === null ? null : c.avgD20 - FAIR_D20;
   return (
     <>
       <div className="eyebrow">{[c.className, c.campaign].filter(Boolean).join(" · ") || "Adventurer"}</div>
       <h2 className="info-title">{c.name}</h2>
-      <div style={{ display: "flex", alignItems: "baseline", gap: 10 }}>
-        <span className="info-value info-value-lg">{c.avgD20?.toFixed(2) ?? "–"}</span>
-        <span className="info-label">
-          avg d20{delta !== null && ` · ${delta >= 0 ? "+" : ""}${delta.toFixed(2)} vs fair`}
-        </span>
-      </div>
-      <LuckMeter avg={c.avgD20} />
-      <div className="info-grid info-grid-3">
-        <div><div className="info-value">{c.rollCount.toLocaleString()}</div><div className="info-label">Rolls</div></div>
-        <div><div className="info-value">{c.nat20s}</div><div className="info-label">Nat 20s</div></div>
-        <div><div className="info-value">{c.nat1s}</div><div className="info-label">Nat 1s</div></div>
-      </div>
+      <StatGrid
+        stats={[
+          ["Rolls", c.rollCount, 0],
+          ["Average d20", c.avgD20, 2],
+          ["Natural 20s", c.nat20s, 0],
+          ["Natural 1s", c.nat1s, 0],
+          ["Attacks", c.attacks, 0],
+          ["Spells cast", c.spellsCast, 0],
+          ["Total damage", c.totalDamage, 0],
+        ]}
+      />
       {(c.bestSkill || c.worstSkill) && (
         <dl className="info-skills">
           {c.bestSkill && (
@@ -279,6 +280,22 @@ function CharacterInfo({ c }: { c: CharacterCard }) {
       )}
       <Link href={`/character/${c.id}`} className="info-hint info-link">Open full breakdown →</Link>
     </>
+  );
+}
+
+// 2-column number grid; last stat spans both columns when the count is odd
+//params: stats ([label, value | null, decimals][]) - null shows a dash
+//output: JSX.Element
+function StatGrid({ stats }: { stats: [string, number | null, number][] }) {
+  return (
+    <div className="info-grid">
+      {stats.map(([label, v, dp], i) => (
+        <div key={label} className={i === stats.length - 1 && stats.length % 2 ? "info-wide" : undefined}>
+          <div className="info-value">{v === null ? "–" : <CountUp value={v} decimals={dp} />}</div>
+          <div className="info-label">{label}</div>
+        </div>
+      ))}
+    </div>
   );
 }
 

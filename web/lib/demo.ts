@@ -74,6 +74,9 @@ export function demoCharacters(): CharacterCard[] {
       platform: c.platform,
       bestSkill: { name: SKILL_NAMES[c.id % 8], avgD20: 12.4 + c.id * 0.3, rollCount: 14 },
       worstSkill: { name: SKILL_NAMES[(c.id + 3) % 8], avgD20: 8.9 - c.id * 0.2, rollCount: 11 },
+      attacks: Math.round(c.rolls * 0.3),
+      spellsCast: Math.round(c.rolls * (0.12 + c.id * 0.04)),
+      totalDamage: Math.round(c.rolls * 2.6),
     };
   });
 }

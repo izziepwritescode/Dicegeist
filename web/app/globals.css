@@ -74,13 +74,8 @@ body::before {
   z-index: -1;
 }
 
-/* home: full-bleed hero band ending in layered sea-glass waves (main palette b2cfd5 / 9bbbc6) */
-.home-band {
-  margin-left: calc(50% - 50vw); margin-right: calc(50% - 50vw);   /* stretch to viewport edges */
-  padding: 8px calc(50vw - 50%) 96px;                               /* content back inside the shell */
-  margin-top: -40px; padding-top: 48px;
-  background: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1440 120' preserveAspectRatio='none'><path fill='%23b2cfd5' d='M0 40 C 240 18 420 52 720 34 S 1200 20 1440 38 V120 H0Z'/><path fill='%239bbbc6' d='M0 84 C 300 66 520 96 860 78 S 1260 70 1440 86 V120 H0Z'/></svg>") bottom / 100% 110px no-repeat;
-}
+/* home: hero block, plain page background */
+.home-band { padding: 8px 0 40px; }
 
 a { color: inherit; text-decoration: none; }
 
@@ -93,15 +88,6 @@ Layout shell
 --------------------------------------------------------------------------------------------------------------*/
 
 .shell { width: 100%; max-width: 1120px; margin: 0 auto; padding: 0 16px; }
-
-.site-header {
-  position: sticky; top: 0; z-index: 10;
-  backdrop-filter: blur(12px) saturate(140%);
-  background: color-mix(in srgb, var(--page) 70%, transparent);
-}
-.site-header .shell { display: flex; align-items: center; justify-content: space-between; height: 60px; }
-.wordmark { font-family: var(--font-display); font-size: 1.25rem; font-weight: 600; display: flex; gap: 10px; align-items: center; }
-.wordmark svg { color: var(--accent); }
 
 .site-footer { color: var(--ink-muted); font-size: 0.85rem; padding: 48px 0 32px; text-align: center; }
 
@@ -243,14 +229,14 @@ Home v2: header, character panels, info panel
 .panel-strip { display: flex; gap: 20px; min-height: 440px; }
 .panel-group { display: flex; flex-direction: column; flex-basis: 0; min-width: 0; }
 .panel-row { display: flex; gap: 12px; flex: 1; }
-.panel-wrap { flex-basis: 0; min-width: 0; display: flex; }
+.panel-wrap { flex: 1 1 0; min-width: 0; display: flex; }
 
 /* panel fill = character ramp, light mid-tone at top fading to darkest at the foot; no outline */
 .panel {
   flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: space-between;
   padding: 22px 8px 16px; min-height: 400px; color: #ffffff;
   background: linear-gradient(180deg, var(--c3, #3d5862) 0%, var(--c1, #14303a) 85%);
-  border-radius: var(--radius);
+  border-radius: 6px; /* small bevel */
   box-shadow: 0 6px 18px -12px rgba(20, 48, 58, 0.5);
   transition: box-shadow 0.35s var(--ease), filter 0.35s var(--ease);
 }
@@ -260,7 +246,9 @@ Home v2: header, character panels, info panel
   font-family: var(--font-display); font-weight: 600; text-transform: uppercase;
   font-size: clamp(1.4rem, 2.6vw, 2.1rem); letter-spacing: 0.06em; line-height: 1;
 }
-.panel-foot { font-size: 1.25rem; font-weight: 800; color: var(--accent); font-variant-numeric: tabular-nums; } /* accent on darkest ramp step */
+.panel-foot { display: flex; flex-direction: column; align-items: center; gap: 2px; text-align: center; line-height: 1.25; }
+.panel-class { font-size: 1rem; font-weight: 800; color: var(--accent); } /* accent on darkest ramp step */
+.panel-campaign { font-size: 0.75rem; color: var(--c5); }
 
 /* bracket under each platform group: bottom border + end ticks, label centred below */
 .panel-bracket {
@@ -274,12 +262,11 @@ Home v2: header, character panels, info panel
 }
 
 /* info panel */
-.info-panel { position: relative; min-height: 400px; background: var(--surface-2); transition: background-color 0.4s var(--ease), color 0.4s var(--ease); }
+.info-panel { position: relative; min-height: 400px; border-radius: 6px; background: var(--surface-2); transition: background-color 0.4s var(--ease), color 0.4s var(--ease); }
 .info-title { font-size: 1.6rem; margin: 4px 0 14px; }
 .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 18px 12px; margin: 10px 0 16px; }
-.info-grid-3 { grid-template-columns: repeat(3, 1fr); }
+.info-wide { grid-column: 1 / -1; } /* odd last stat spans both columns */
 .info-value { font-size: 1.6rem; font-weight: 700; line-height: 1.1; font-variant-numeric: tabular-nums; color: var(--metric); }
-.info-value-lg { font-size: 2.4rem; }
 .info-label { font-size: 0.8rem; color: var(--ink-2); }
 .info-skills { display: grid; gap: 8px; margin: 4px 0 16px; font-size: 0.875rem; }
 .info-skills dt { font-size: 0.75rem; color: var(--ink-muted); text-transform: uppercase; letter-spacing: 0.06em; }
@@ -303,4 +290,5 @@ Home v2: header, character panels, info panel
   .panel-wrap { flex: none !important; }
   .panel { flex-direction: row; min-height: 0; padding: 16px 18px; }
   .panel-name { writing-mode: horizontal-tb; font-size: 1.4rem; }
+  .panel-foot { align-items: flex-end; text-align: right; }
 }

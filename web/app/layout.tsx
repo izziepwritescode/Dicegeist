@@ -1,4 +1,4 @@
-// root layout: fonts, sticky header, footer, demo banner; wraps every page
+// root layout: fonts, footer, demo banner; wraps every page
 // Usage Syntax: picked up automatically by Next.js (app router)
 //--------------------------------------------------------------------------------------------------------------
 // Outline
@@ -12,9 +12,7 @@
 
 import type { Metadata } from "next"; //page <head> typing
 import { Fraunces, Inter } from "next/font/google"; //self-hosted Google fonts, no layout shift
-import Link from "next/link"; //client-side navigation, no full page reload
 import { MotionRoot } from "@/components/MotionRoot"; //honours OS reduce-motion for every animation
-import { D20Icon } from "@/components/ui"; //logo glyph
 import { isDemo } from "@/lib/data"; //true when Supabase env vars are missing
 import "./globals.css";
 
@@ -51,14 +49,6 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
             Demo data. Set NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY to show real rolls.
           </div>
         )}
-        <header className="site-header">
-          <div className="shell">
-            <Link href="/" className="wordmark">
-              <D20Icon size={22} /> Dicegeist
-            </Link>
-            <span className="pill">D&amp;D roll analytics</span>
-          </div>
-        </header>
         <MotionRoot>
           <main className="shell">{children}</main>
         </MotionRoot>
