@@ -35,7 +35,7 @@ Never put the `service_role` / secret key in this app: anything `NEXT_PUBLIC_` s
   ```sql
   update public.characters set is_public = true where id in (1, 2, 3, 4);
   ```
-- Live push updates: run `supabase/migrations/20261007180000_realtime_rolls.sql` once. Without it -> 60s auto-refresh fallback, badge reads "Auto-refresh" instead of "Live".
+- Live push updates: run `supabase/migrations/20261007180000_realtime_rolls.sql` once. Without it -> no change events, page only updates on reload.
 
 ## Layout
 
@@ -86,10 +86,10 @@ Numbers from `numeric` / `bigint` columns arrive as text over the API -> `num()`
 1. first load: run the query, store rows
 2. open a Realtime channel on `rolls` + `characters`; any insert/update/delete -> refetch
 3. debounce 1.5s: bulk import of 900 rolls = 900 events -> one refetch once they stop
-4. Realtime unreachable -> refetch every 60s instead
-5. tab regains focus -> refetch
+4. connection drops (sleep, wifi) -> badge reads "Reconnecting", supabase-js retries; on reconnect -> one catch-up refetch
+5. no timers: no database change -> no query
 
-Equivalent to Power BI "refresh on change" instead of scheduled refresh. `pulse` counter ticks on each refresh -> totals flash.
+Equivalent to Power BI "refresh on change", never a scheduled refresh. `pulse` counter ticks on each refresh -> totals flash.
 
 ### Transitions
 

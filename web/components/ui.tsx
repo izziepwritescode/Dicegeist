@@ -45,7 +45,7 @@ export function D20Icon({ size = 20 }: { size?: number }) {
 const STATUS_TEXT: Record<LiveStatus, string> = {
   loading: "Connecting",
   live: "Live",
-  polling: "Auto-refresh",
+  reconnecting: "Reconnecting",
   demo: "Demo data",
   error: "Offline",
 };
