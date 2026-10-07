@@ -1,0 +1,5 @@
+character,source,attacks,in_multiattack_groups,literal_rule_hit_pct,literal_rule_nat20_hit_pct,grouped_rule_hit_pct,grouped_nat20_hit_pct,grouped_nat1_hit_pct,dashboard_hit_pct,agree_with_dashboard_pct,attacks_with_logged_ac,agree_with_logged_ac_pct,hits_by_ac_without_damage,damage_after_ac_miss,best_fit_single_ac
+Lazlo,roll20,288,237,43.8,45.5,69.8,100.0,6.2,77.1,81.6,0,,0,0,15
+Vasha,roll20,221,152,47.1,22.2,71.9,100.0,0.0,79.6,87.8,0,,0,0,14
+Ivan Maddock,foundry,98,14,67.3,71.4,70.4,85.7,0.0,86.7,83.7,72,91.7,6,0,15
+Idris Ildroun,foundry,50,9,62.0,100.0,62.0,100.0,0.0,66.0,96.0,19,100.0,0,0,14
