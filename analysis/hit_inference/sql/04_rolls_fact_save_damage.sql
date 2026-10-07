@@ -1,0 +1,13 @@
+-- Dicegeist reporting: rolls_fact + save-spell damage columns (damage per cast replaces the DC slider)
+-- Usage Syntax: applied as migration 20261007<hhmmss>_reporting_save_damage; based on the live def read after reporting_heal_multiplier
+
+--------------------------------------------------------------------------------------------------------------
+-- Outline
+--   save_dmg CTE            damage rolls that came from a save spell -> 'half' / 'none' on a successful save
+--     SAVE_HALF, SAVE_NONE  spell lookups for logs with no damageOnSave flag (Roll20, old Foundry actors)
+--   rolls_fact              2 columns appended:
+--     save_damage_kind      'half' = damage lands pass or fail; 'none' = damage only on a failed save
+--     is_save_damage        damage rolls only: came from a save spell -> no hit/miss can be inferred
+--------------------------------------------------------------------------------------------------------------
+-- Applied live 2026-10-07 as migration reporting_save_damage. The full view body is the repo copy at
+-- supabase/migrations/20261007144500_reporting_save_damage.sql (same text, kept in one place).
