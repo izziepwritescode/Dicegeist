@@ -8,9 +8,10 @@
 //     CHARS (const)
 //     demoCharacters
 //     demoDetail
+//     demoSheet
 //--------------------------------------------------------------------------------------------------------------
 
-import type { CharacterCard, CharacterDetail } from "./data"; //row shapes only
+import type { CharacterCard, CharacterDetail, CharacterSheet } from "./data"; //row shapes only
 
 //--------------------------------------------------------------------------------------------------------------
 //Seeded random (same numbers every load, so the demo does not jitter)
@@ -107,5 +108,72 @@ export function demoDetail(id: number): CharacterDetail | null {
         nat1s: Math.round(r() * 3),
       };
     }),
+    sheet: demoSheet(card),
+  };
+}
+
+// stat sheet in the character_sheet() shape; fixed spread of attacks / spells, play nights simulated
+//params: card (CharacterCard) - totals reused so the sheet agrees with the tiles
+//output: CharacterSheet
+function demoSheet(card: CharacterCard): CharacterSheet {
+  const r = rng(card.id * 31);
+  const roll20 = card.platform === "roll20";
+  const nights = Array.from({ length: 40 }, (_, i) => {
+    const d20s = Math.round(r() * 20);
+    const date = new Date(Date.UTC(2025, 0, 7 + i * 7)).toISOString().slice(0, 10); //weekly
+    return {
+      date,
+      d20s,
+      avgD20: d20s ? Math.round((6 + r() * 9) * 100) / 100 : null,
+      expectedD20: d20s ? Math.round((10 + r() * 1.5) * 1000) / 1000 : null,
+      nat20s: Math.round(r() * 2),
+      nat1s: Math.round(r() * 2),
+    };
+  });
+  return {
+    kpis: {
+      rolls: card.rollCount, d20s: card.d20Count, nat20s: card.nat20s, nat1s: card.nat1s,
+      avgD20: card.avgD20, expectedD20: 10.89,
+      attacks: card.attacks ?? 0, hits: Math.round((card.attacks ?? 0) * 0.62),
+      damage: card.totalDamage ?? 0, spellDamage: Math.round((card.totalDamage ?? 0) * 0.8), spellsCast: card.spellsCast ?? 0,
+      healHP: roll20 ? null : 1553, heals: roll20 ? null : 87, tempHP: roll20 ? null : 685,
+      nights: nights.length, platform: card.platform,
+    },
+    abilities: [
+      ["STR", 8, 18, 8.9, 8.6, 20, 20], ["DEX", 14, 73, 11.1, 13.2, 23, 20], ["CON", 16, 1, 1, 4, 4, 1],
+      ["INT", 10, 36, 10.9, 13, 23, 20], ["WIS", 20, 80, 9.6, 16.6, 31, 20], ["CHA", 14, 12, 11.7, 15.3, 24, 19],
+    ].map(([code, score, rolls, avgD20, avgTotal, maxTotal, maxD20]) => ({
+      code: code as string, score: score as number, rolls: rolls as number, avgD20: avgD20 as number,
+      avgTotal: avgTotal as number, maxTotal: maxTotal as number, maxD20: maxD20 as number,
+    })),
+    attacks: {
+      basis: roll20 ? { loggedAC: 0, damageEvidence: 50, slider: 0 } : { loggedAC: 19, damageEvidence: 31, slider: 0 },
+      sources: [
+        { source: "Spiritual Weapon", attacks: 31, hits: 19 },
+        { source: "Guiding Bolt", attacks: 10, hits: 8 },
+        { source: "Weapon attack", attacks: 9, hits: 4 },
+      ],
+    },
+    damageTypes: [
+      { type: "Radiant", source: "Spell", rolls: 100, damage: 1277 },
+      { type: "Force", source: "Spell", rolls: 27, damage: 249 },
+      { type: "Necrotic", source: "Spell", rolls: 6, damage: 76 },
+      { type: "Untyped", source: "Weapon", rolls: 7, damage: 66 },
+      { type: "Untyped", source: "Spell", rolls: 2, damage: 49 },
+      { type: "Fire", source: "Spell", rolls: 1, damage: 27 },
+    ],
+    damage: { rolls: 143, avg: 12.2, spellAvg: 12.3, weaponAvg: 9.4, biggest: 31, diceLuck: 1.051 },
+    spellLevels: [
+      { level: 0, casts: 53 }, { level: 1, casts: 47 }, { level: 2, casts: 63 }, { level: 3, casts: 37 }, { level: 4, casts: 6 },
+    ],
+    spells: [
+      { name: "Cure Wounds", minLevel: 1, maxLevel: 4, casts: 61, damage: 0, healing: 1103 },
+      { name: "Sacred Flame", minLevel: 0, maxLevel: 0, casts: 48, damage: 492, healing: 0 },
+      { name: "Spiritual Weapon", minLevel: 2, maxLevel: 2, casts: 31, damage: 249, healing: 0 },
+      { name: "Healing Word", minLevel: 1, maxLevel: 4, casts: 19, damage: 0, healing: 226 },
+      { name: "Spirit Guardians", minLevel: 3, maxLevel: 3, casts: 18, damage: 527, healing: 0 },
+      { name: "Guiding Bolt", minLevel: 1, maxLevel: 4, casts: 10, damage: 169, healing: 0 },
+    ],
+    nights,
   };
 }

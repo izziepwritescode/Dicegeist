@@ -8,6 +8,7 @@
 //   Theme builders
 //     paletteFor
 //     themeVars
+//     luminance
 //   Hook
 //     useCharacterTheme
 //--------------------------------------------------------------------------------------------------------------
@@ -72,10 +73,25 @@ export function themeVars(name: string | null | undefined): Record<string, strin
     "--below": c4,
     "--good": p.accent,
     "--critical": "#e66767",
+    "--accent-deep": p.accentDeep,
+    "--on-accent": luminance(p.accent) > 0.25 ? c1 : "#ffffff", //text on accent fills: dark on mint / gold / orange, white on Vasha's teal
     "--c1": c1,
+    "--c2": c2,
     "--c3": c3,
+    "--c4": c4,
     "--c5": c5,
   };
+}
+
+// relative luminance of a #rrggbb colour (WCAG formula), 0 = black .. 1 = white
+//params: hex (string)
+//output: number
+function luminance(hex: string): number {
+  const [r, g, b] = [1, 3, 5].map((i) => {
+    const v = parseInt(hex.slice(i, i + 2), 16) / 255;
+    return v <= 0.03928 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4; //undo sRGB gamma
+  });
+  return 0.2126 * r + 0.7152 * g + 0.0722 * b;
 }
 
 //--------------------------------------------------------------------------------------------------------------

@@ -36,9 +36,12 @@ Tokens
   --good: #0ca30c;            /* nat 20 */
   --critical: #d03b3b;        /* nat 1 */
   --shadow: 0 10px 30px -14px rgba(20, 48, 58, 0.35);
+  --accent-deep: #14303a;
+  --on-accent: #ffffff;
+  --c1: #14303a; --c2: #3d5862; --c3: #5a7480; --c4: #9bbbc6; --c5: #b2cfd5; /* fallback ramp; lib/themes.ts overrides per character */
 
-  --radius: 16px;
-  --radius-sm: 10px;
+  --radius: 8px;      /* small bevel, matches the home panels */
+  --radius-sm: 6px;
   --ease: cubic-bezier(0.22, 1, 0.36, 1);
   --font-sans: var(--font-inter), system-ui, -apple-system, "Segoe UI", sans-serif;
   --font-display: var(--font-fraunces), Georgia, serif;
@@ -144,6 +147,11 @@ Shared pieces
 @keyframes ping { 0% { transform: scale(1); opacity: 0.7; } 100% { transform: scale(3); opacity: 0; } }
 
 .stats-row { display: grid; gap: 12px; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); margin-bottom: 20px; }
+.stats-row-8 { grid-template-columns: repeat(8, minmax(0, 1fr)); gap: 10px; }
+.stats-row-8 .card { padding: 14px 12px; }
+@media (max-width: 1000px) { .stats-row-8 { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
+@media (max-width: 520px) { .stats-row-8 { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+.stats-row-8 .stat-value { font-size: 1.6rem; }
 .stat-value { font-size: 2rem; font-weight: 700; line-height: 1.1; margin-top: 4px; color: var(--metric); }
 .stat-sub { font-size: 0.8rem; color: var(--ink-2); margin-top: 4px; }
 
@@ -293,3 +301,49 @@ Home v2: header, character panels, info panel
   .panel-name { writing-mode: horizontal-tb; font-size: 1.4rem; }
   .panel-foot { align-items: flex-end; text-align: right; }
 }
+
+/*--------------------------------------------------------------------------------------------------------------
+Character sheet sections (components/SheetSections.tsx); colours all come from the character theme vars
+--------------------------------------------------------------------------------------------------------------*/
+
+.sheet-grid { display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); gap: 16px; margin-top: 20px; }
+.span-5 { grid-column: span 5; } .span-6 { grid-column: span 6; } .span-7 { grid-column: span 7; } .span-12 { grid-column: span 12; }
+@media (max-width: 900px) { .span-5, .span-6, .span-7 { grid-column: span 12; } }
+
+.card-note, .card-foot { color: var(--ink-2); font-size: 0.8rem; }
+.card-note { margin: 2px 0 10px; }
+.card-foot { margin-top: 14px; }
+.card-empty { color: var(--ink-2); font-size: 0.875rem; }
+.sub-head { font-size: 1.05rem; margin-top: 20px; }
+
+/* stacked bar: segments = motion.i, label inside */
+.split { display: flex; height: 24px; border-radius: var(--radius-sm); overflow: hidden; margin: 4px 0 12px; background: var(--page); }
+.split i {
+  display: flex; align-items: center; justify-content: center; overflow: hidden; white-space: nowrap;
+  font-style: normal; font-size: 0.72rem; font-weight: 700;
+}
+
+/* label | bar | number */
+.bar-row { display: grid; grid-template-columns: minmax(90px, 150px) 1fr auto; gap: 10px; align-items: center; margin: 6px 0; font-size: 0.85rem; }
+.bar-label { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.bar-label small { color: var(--ink-muted); font-size: 0.72rem; }
+.bar-track { height: 10px; border-radius: 999px; background: var(--page); overflow: hidden; }
+.bar-track i { display: block; height: 100%; border-radius: 999px; }
+.bar-num { color: var(--ink-2); font-size: 0.78rem; font-variant-numeric: tabular-nums; white-space: nowrap; }
+
+/* abilities array: six blocks on the darkest ramp step so every accent stays readable, no outlines */
+.abil-grid { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 10px; }
+@media (max-width: 700px) { .abil-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+.abil { background: var(--page); border-radius: var(--radius-sm); padding: 12px 6px; text-align: center; }
+.abil-code { color: var(--accent); font-weight: 700; font-size: 0.85rem; letter-spacing: 0.06em; }
+.abil-score { font-size: 1.6rem; font-weight: 700; line-height: 1.2; }
+.abil-note { color: var(--ink-2); font-size: 0.72rem; }
+.abil-stats { display: flex; justify-content: center; gap: 14px; margin: 8px 0 4px; }
+.abil-stats b { display: block; font-size: 1rem; color: var(--metric); font-variant-numeric: tabular-nums; }
+.abil-stats span { font-size: 0.68rem; color: var(--ink-muted); }
+
+/* best / worst night boxes */
+.nights { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px; }
+.night { background: var(--page); border-radius: var(--radius-sm); padding: 10px 12px; }
+.night-k { color: var(--ink-2); font-size: 0.75rem; }
+.night-d { font-weight: 700; font-size: 1.05rem; font-variant-numeric: tabular-nums; }

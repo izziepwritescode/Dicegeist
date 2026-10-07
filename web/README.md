@@ -37,6 +37,7 @@ Never put the `service_role` / secret key in this app: anything `NEXT_PUBLIC_` s
   ```
 - Live push updates: run `supabase/migrations/20261007180000_realtime_rolls.sql` once. Without it -> no change events, page only updates on reload.
 - Attacks / spells cast / total damage on the home panel: run `supabase/migrations/20261007200000_character_combat_summary.sql` once. Without it -> those stats show a dash.
+- Character page stat sheet (abilities, attacks, damage, spells, play nights): run `supabase/migrations/20261007210000_character_sheet.sql` once. Without it -> the page shows only the four headline tiles, d20 faces and skills.
 
 ## Layout
 
@@ -52,6 +53,7 @@ web/
     ui.tsx                  LiveBadge, CountUp, StatTile, LuckMeter, D20Icon
     FaceChart.tsx           d20 face distribution vs fair 5%
     SkillChart.tsx          per-skill avg d20, diverging around 10.5
+    SheetSections.tsx       character_sheet() sections: tiles, abilities, attacks, damage, spells, play nights
     MotionRoot.tsx          respects OS reduce-motion
   lib/
     data.ts                 Supabase client + queries -> typed rows
