@@ -34,10 +34,10 @@ function rng(seed: number): () => number {
 //--------------------------------------------------------------------------------------------------------------
 
 const CHARS = [
-  { id: 1, name: "Warlock", campaign: "Sample Campaign A", className: "Warlock", rolls: 900, platform: "roll20" },
-  { id: 2, name: "Paladin", campaign: "Sample Campaign B", className: "Paladin", rolls: 700, platform: "roll20" },
-  { id: 3, name: "Cleric", campaign: "Sample Campaign C", className: "Cleric", rolls: 720, platform: "foundry" },
-  { id: 4, name: "Sorcerer", campaign: "Sample Campaign D", className: "Sorcerer", rolls: 520, platform: "foundry" },
+  { id: 1, name: "Lazlo", campaign: "Sample Campaign A", className: "Warlock", rolls: 900, platform: "roll20" },
+  { id: 2, name: "Vasha", campaign: "Sample Campaign B", className: "Paladin", rolls: 700, platform: "roll20" },
+  { id: 3, name: "Idris Ildroun", campaign: "Sample Campaign C", className: "Cleric", rolls: 720, platform: "foundry" },
+  { id: 4, name: "Ivan Maddock", campaign: "Sample Campaign D", className: "Sorcerer", rolls: 520, platform: "foundry" },
 ];
 
 const SKILLS = ["perception", "insight", "stealth", "arcana", "athletics", "persuasion", "investigation", "deception"];

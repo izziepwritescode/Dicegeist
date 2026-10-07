@@ -56,7 +56,7 @@ export function FaceChart({ faces }: { faces: FaceStat[] }) {
   const y = (v: number) => PAD.top + plotH - (v / yMax) * plotH; //share -> svg y
   const ticks = Array.from({ length: Math.round(yMax * 100 / 2) + 1 }, (_, i) => i * 0.02).filter((t) => t <= yMax + 1e-9);
 
-  const color = (face: number) => (face === 20 ? "var(--good)" : face === 1 ? "var(--critical)" : "var(--accent)");
+  const color = (face: number) => (face === 20 ? "var(--good)" : face === 1 ? "var(--critical)" : "var(--bar)"); //nat 20 punched out in the theme accent
   const h = hover === null ? null : faces[hover];
 
   return (
@@ -154,7 +154,7 @@ export function FaceChart({ faces }: { faces: FaceStat[] }) {
           )}
 
           <div className="legend">
-            <span><i style={{ background: "var(--accent)" }} />Face share</span>
+            <span><i style={{ background: "var(--bar)" }} />Face share</span>
             <span><i style={{ background: "var(--critical)" }} />Natural 1</span>
             <span><i style={{ background: "var(--good)" }} />Natural 20</span>
             <span><i className="line" style={{ borderTop: "2px dashed var(--ink-2)", background: "none" }} />Fair (5%)</span>

@@ -26,6 +26,7 @@ import { fetchCharacters, type CharacterCard } from "@/lib/data"; //Supabase rea
 import { useLive } from "@/lib/useLive"; //refresh on new rolls
 import { CountUp, FAIR_D20, LiveBadge, LuckMeter } from "@/components/ui";
 import { D20Counter } from "@/components/D20Counter"; //hero die with total roll count
+import { paletteFor, themeVars } from "@/lib/themes"; //per-character colour ramps + accents
 
 //--------------------------------------------------------------------------------------------------------------
 //Constants
@@ -50,7 +51,7 @@ export default function Home() {
   return (
     <>
       {/* header: die left, title + rule + description right */}
-      <section className="home-head">
+      <section className="home-head home-band">
         <div className="home-die">
           <D20Counter value={total} />
           <span className="home-die-caption">&amp; counting</span>
@@ -176,6 +177,7 @@ function Panel({
       <Link
         href={`/character/${c.id}`}
         className={`panel ${isActive ? "is-active" : ""}`}
+        style={themeVars(c.name)} //character ramp + accent as local CSS vars
         onPointerDown={(e) => (touch.current = e.pointerType === "touch")}
         onMouseEnter={() => !touch.current && setActive(c.id)}
         onFocus={() => !touch.current && setActive(c.id)} //keyboard focus only; a tap also focuses, handled in onClick
@@ -193,8 +195,11 @@ function Panel({
 //params: rows (CharacterCard[]); active (CharacterCard | null); pulse (number) - live refresh counter
 //output: JSX.Element
 function InfoPanel({ rows, active, pulse }: { rows: CharacterCard[]; active: CharacterCard | null; pulse: number }) {
+  //hovered character -> box takes their darkest ramp step + accent metrics; otherwise main palette
+  const p = paletteFor(active?.name);
+  const style = p ? { ...themeVars(active!.name), backgroundColor: p.ramp[0], color: "#ffffff" } : undefined;
   return (
-    <aside className="card info-panel" aria-live="polite">
+    <aside className="card info-panel" aria-live="polite" style={style}>
       {pulse > 0 && <span key={pulse} className="flash-ring flash" aria-hidden />}
       <AnimatePresence mode="wait">
         <motion.div
