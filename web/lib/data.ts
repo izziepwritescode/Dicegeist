@@ -4,6 +4,7 @@
 // Outline
 //   Types
 //     CharacterCard / SkillPick / SkillStat / FaceStat / CharacterDetail
+//     CharacterSheet (+ part types) - character_sheet() JSON
 //   Client
 //     isDemo / getClient
 //   Queries
@@ -61,6 +62,39 @@ export type CharacterDetail = {
   card: CharacterCard;
   skills: SkillStat[];
   faces: FaceStat[]; //d20 only, faces 1..20, missing faces filled with 0
+  sheet: CharacterSheet | null; //null until the character_sheet migration is applied
+};
+
+//character_sheet() output; keys match the jsonb_build_object names in the migration
+export type SheetAbility = {
+  code: string; //STR..CHA
+  score: number | null; //entered on characters; null = not entered
+  rolls: number;
+  avgD20: number | null;
+  avgTotal: number | null;
+  maxTotal: number | null;
+  maxD20: number | null;
+};
+export type SheetSpell = { name: string; minLevel: number | null; maxLevel: number | null; casts: number; damage: number; healing: number };
+export type SheetNight = { date: string; d20s: number; avgD20: number | null; expectedD20: number | null; nat20s: number; nat1s: number };
+export type CharacterSheet = {
+  kpis: {
+    rolls: number; d20s: number; nat20s: number; nat1s: number;
+    avgD20: number | null; expectedD20: number | null; //expected = fair d20 after advantage / disadvantage
+    attacks: number; hits: number; damage: number; spellDamage: number; spellsCast: number;
+    healHP: number | null; heals: number | null; tempHP: number | null; //null = roll20 (healing logs incomplete)
+    nights: number; platform: string | null;
+  };
+  abilities: SheetAbility[];
+  attacks: {
+    basis: { loggedAC: number; damageEvidence: number; slider: number }; //how each hit was decided
+    sources: { source: string; attacks: number; hits: number }[];
+  };
+  damageTypes: { type: string; source: "Spell" | "Weapon"; rolls: number; damage: number }[];
+  damage: { rolls: number; avg: number | null; spellAvg: number | null; weaponAvg: number | null; biggest: number | null; diceLuck: number | null };
+  spellLevels: { level: number | null; casts: number }[]; //0 = cantrip, null = unknown
+  spells: SheetSpell[];
+  nights: SheetNight[];
 };
 
 //--------------------------------------------------------------------------------------------------------------
@@ -132,16 +166,18 @@ export async function fetchCharacterDetail(id: number): Promise<CharacterDetail 
   if (isDemo) return demoDetail(id);
   const sb = getClient();
 
-  //all five reads in parallel; RLS filters each to public characters
-  const [char, sum, skills, faces, lookup] = await Promise.all([
+  //all six reads in parallel; RLS (or the function's own gate) filters each to public characters
+  const [char, sum, skills, faces, lookup, sheet] = await Promise.all([
     sb.from("characters").select("id, name, campaign, class_name").eq("id", id).maybeSingle(),
     sb.from("character_roll_summary").select("*").eq("character_id", id).maybeSingle(),
     sb.from("skill_roll_stats").select("*").eq("character_id", id),
     sb.from("die_cursedness_checks").select("face, times_rolled, observed_share").eq("character_id", id).eq("sides", 20),
     sb.from("skills_abilities").select("code, name"),
+    sb.rpc("character_sheet", { p_character_id: id }), //one JSON object, built in SQL from the reporting views
   ]);
   for (const r of [char, sum, skills, faces, lookup]) if (r.error) throw r.error;
   if (!char.data) return null;
+  //sheet error (function not created yet) -> null, the older sections still render
 
   const names = new Map((lookup.data ?? []).map((s) => [s.code as string, s.name as string]));
 
@@ -166,6 +202,7 @@ export async function fetchCharacterDetail(id: number): Promise<CharacterDetail 
       }))
       .sort((a, b) => b.rollCount - a.rollCount),
     faces: faceStats,
+    sheet: sheet.error ? null : ((sheet.data as CharacterSheet | null) ?? null),
   };
 }
 

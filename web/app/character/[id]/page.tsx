@@ -1,4 +1,4 @@
-// character page: headline tiles, d20 face chart, per-skill luck, all live
+// character page: headline tiles, abilities, attacks, damage, spells, play nights, d20 faces, skills; all live
 // Usage Syntax: served at "/character/<characters.id>", e.g. /character/1
 //--------------------------------------------------------------------------------------------------------------
 // Outline
@@ -15,6 +15,7 @@ import { fetchCharacterDetail } from "@/lib/data"; //Supabase reads
 import { useLive } from "@/lib/useLive"; //auto-refresh on new rolls
 import { FAIR_D20, LiveBadge, StatTile } from "@/components/ui";
 import { FaceChart } from "@/components/FaceChart";
+import { AbilitiesArray, AttackSplit, DamageByType, NightsChart, SheetKpis, SpellVsWeapon, SpellsCast } from "@/components/SheetSections"; //character_sheet() sections
 import { SkillChart } from "@/components/SkillChart";
 import { useCharacterTheme } from "@/lib/themes"; //character palette on the whole page
 
@@ -61,19 +62,48 @@ export default function CharacterPage() {
             )}
           </motion.section>
 
-          <motion.div className="stats-row" variants={rise}>
-            <StatTile
-              label="Average d20"
-              value={data.card.avgD20}
-              decimals={2}
-              sub={data.card.avgD20 === null ? undefined : `${data.card.avgD20 >= FAIR_D20 ? "+" : ""}${(data.card.avgD20 - FAIR_D20).toFixed(2)} vs fair 10.5`}
-            />
-            <StatTile label="Rolls" value={data.card.rollCount} sub={`${data.card.d20Count.toLocaleString()} with a d20`} />
-            <StatTile label="Natural 20s" value={data.card.nat20s} tone="good" sub={pctOf(data.card.nat20s, data.card.d20Count)} />
-            <StatTile label="Natural 1s" value={data.card.nat1s} tone="critical" sub={pctOf(data.card.nat1s, data.card.d20Count)} />
-          </motion.div>
+          {data.sheet ? (
+            <>
+              <motion.div variants={rise}>
+                <SheetKpis sheet={data.sheet} />
+              </motion.div>
+              <motion.div variants={rise}>
+                <AbilitiesArray abilities={data.sheet.abilities} />
+              </motion.div>
+              <motion.div className="sheet-grid" variants={rise}>
+                <div className="span-6">
+                  <AttackSplit attacks={data.sheet.attacks} total={data.sheet.kpis.attacks} hits={data.sheet.kpis.hits} />
+                </div>
+                <div className="span-6">
+                  <NightsChart nights={data.sheet.nights} />
+                </div>
+                <div className="span-7">
+                  <DamageByType types={data.sheet.damageTypes} />
+                </div>
+                <div className="span-5">
+                  <SpellVsWeapon total={data.sheet.kpis.damage} spell={data.sheet.kpis.spellDamage} damage={data.sheet.damage} />
+                </div>
+                <div className="span-12">
+                  <SpellsCast levels={data.sheet.spellLevels} spells={data.sheet.spells} total={data.sheet.kpis.spellsCast} />
+                </div>
+              </motion.div>
+            </>
+          ) : (
+            //character_sheet() not created yet -> the original four tiles
+            <motion.div className="stats-row" variants={rise}>
+              <StatTile
+                label="Average d20"
+                value={data.card.avgD20}
+                decimals={2}
+                sub={data.card.avgD20 === null ? undefined : `${data.card.avgD20 >= FAIR_D20 ? "+" : ""}${(data.card.avgD20 - FAIR_D20).toFixed(2)} vs fair 10.5`}
+              />
+              <StatTile label="Rolls" value={data.card.rollCount} sub={`${data.card.d20Count.toLocaleString()} with a d20`} />
+              <StatTile label="Natural 20s" value={data.card.nat20s} tone="good" sub={pctOf(data.card.nat20s, data.card.d20Count)} />
+              <StatTile label="Natural 1s" value={data.card.nat1s} tone="critical" sub={pctOf(data.card.nat1s, data.card.d20Count)} />
+            </motion.div>
+          )}
 
-          <motion.div variants={rise}>
+          <motion.div variants={rise} className="section">
             <FaceChart faces={data.faces} />
           </motion.div>
           <motion.div variants={rise} className="section">
