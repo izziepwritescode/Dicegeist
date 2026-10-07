@@ -9,7 +9,7 @@
 --------------------------------------------------------------------------------------------------------------
 --Realtime publication
 --change events stream to browsers only for tables in this publication; RLS still filters what anon receives
---without this the site falls back to a 60s auto-refresh
+--without this the site gets no change events and only updates on page reload
 --------------------------------------------------------------------------------------------------------------
 
 alter publication supabase_realtime add table public.rolls, public.characters;
