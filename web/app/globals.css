@@ -118,6 +118,19 @@ main.shell { padding-top: 40px; padding-bottom: 24px; } /* .shell sets side padd
 .hero h1 { font-size: clamp(2rem, 5vw, 3.25rem); line-height: 1.1; margin: 8px 0 12px; }
 .hero p { color: var(--ink-2); max-width: 60ch; }
 
+/* hero with d20 counter on the left of the title; smaller die on phones, still beside it */
+.hero-row { display: flex; align-items: center; gap: 28px; }
+.d20-counter { width: clamp(150px, 20vw, 220px); height: auto; flex-shrink: 0; overflow: visible; }
+.d20-body { fill: var(--accent); fill-opacity: 0.1; stroke: var(--accent); stroke-opacity: 0.55; stroke-width: 2; stroke-linejoin: round; }
+.d20-face { fill: var(--accent); fill-opacity: 0.08; stroke: var(--accent); stroke-opacity: 0.45; stroke-width: 1.5; stroke-linejoin: round; }
+.d20-facet { stroke: var(--accent); stroke-opacity: 0.3; stroke-width: 1.25; }
+.d20-number { fill: var(--ink); font-family: var(--font-sans); font-weight: 700; font-variant-numeric: tabular-nums; }
+.d20-label { fill: var(--ink-2); font-family: var(--font-sans); font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase; }
+@media (max-width: 560px) {
+  .hero-row { gap: 14px; align-items: flex-start; }
+  .d20-counter { width: 96px; margin-top: 4px; }
+}
+
 .grid-cards { display: grid; gap: 16px; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); }
 
 /*--------------------------------------------------------------------------------------------------------------
@@ -140,6 +153,7 @@ Shared pieces
   display: inline-flex; align-items: center; gap: 6px;
   font-size: 0.75rem; color: var(--ink-2);
   border: 1px solid var(--border); border-radius: 999px; padding: 3px 10px;
+  white-space: nowrap;
 }
 
 /* live badge: pulsing dot when realtime is connected */
