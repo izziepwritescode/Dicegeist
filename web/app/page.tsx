@@ -4,6 +4,7 @@
 // Outline
 //   Page
 //     Home
+//     totalRolls
 //   Pieces
 //     CharacterTile
 //     Totals
@@ -16,6 +17,7 @@ import { motion } from "motion/react"; //staggered card entrance + hover lift
 import { fetchCharacters, type CharacterCard } from "@/lib/data"; //Supabase reads
 import { useLive } from "@/lib/useLive"; //auto-refresh on new rolls
 import { CountUp, FAIR_D20, LiveBadge, LuckMeter } from "@/components/ui";
+import { D20Counter } from "@/components/D20Counter"; //hero die with total roll count
 
 //--------------------------------------------------------------------------------------------------------------
 //Page
@@ -28,16 +30,19 @@ export default function Home() {
 
   return (
     <>
-      <section className="hero">
-        <div style={{ display: "flex", gap: 10, alignItems: "center" }}>
-          <span className="eyebrow">Every roll, every session</span>
-          <LiveBadge status={status} />
+      <section className="hero hero-row">
+        <D20Counter value={data ? totalRolls(data) : null} />
+        <div>
+          <div style={{ display: "flex", gap: 10, rowGap: 6, alignItems: "center", flexWrap: "wrap" }}>
+            <span className="eyebrow">Every roll, every session</span>
+            <LiveBadge status={status} />
+          </div>
+          <h1>Are my dice cursed?</h1>
+          <p>
+            Dice rolls bulk-imported from online D&amp;D sessions, crunched per character and per skill. A fair d20
+            averages 10.5; anything else is the dice gods playing favourites.
+          </p>
         </div>
-        <h1>Are my dice cursed?</h1>
-        <p>
-          Dice rolls bulk-imported from online D&amp;D sessions, crunched per character and per skill. A fair d20
-          averages 10.5; anything else is the dice gods playing favourites.
-        </p>
       </section>
 
       {error && <div className="card empty">Could not load rolls: {error}</div>}
@@ -71,6 +76,13 @@ export default function Home() {
       )}
     </>
   );
+}
+
+// sum of roll_count across visible characters; same number the hero die counts to
+//params: rows (CharacterCard[])
+//output: number
+function totalRolls(rows: CharacterCard[]): number {
+  return rows.reduce((a, r) => a + r.rollCount, 0);
 }
 
 //--------------------------------------------------------------------------------------------------------------
@@ -113,18 +125,16 @@ function CharacterTile({ c }: { c: CharacterCard }) {
   );
 }
 
-// totals across all characters; flashes when a live refresh lands
+// totals across all characters (total rolls lives in the hero die); flashes when a live refresh lands
 //params: rows (CharacterCard[]); pulse (number) - refresh counter from useLive
 //output: JSX.Element
 function Totals({ rows, pulse }: { rows: CharacterCard[]; pulse: number }) {
-  const rolls = rows.reduce((a, r) => a + r.rollCount, 0);
   const d20s = rows.reduce((a, r) => a + r.d20Count, 0);
   const n20 = rows.reduce((a, r) => a + r.nat20s, 0);
   const n1 = rows.reduce((a, r) => a + r.nat1s, 0);
   return (
     <div className="stats-row">
       {[
-        ["Rolls tracked", rolls],
         ["d20s rolled", d20s],
         ["Natural 20s", n20],
         ["Natural 1s", n1],
