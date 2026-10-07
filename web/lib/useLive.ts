@@ -17,17 +17,16 @@ import { getClient, isDemo } from "./data"; //shared Supabase client
 //Types
 //--------------------------------------------------------------------------------------------------------------
 
-// loading -> first fetch; live -> realtime connected; polling -> realtime unavailable, timer fallback; demo; error
-export type LiveStatus = "loading" | "live" | "polling" | "demo" | "error";
+// loading -> first fetch; live -> realtime connected; reconnecting -> realtime dropped, client retrying; demo; error
+export type LiveStatus = "loading" | "live" | "reconnecting" | "demo" | "error";
 
 const DEBOUNCE_MS = 1500; //bulk import = hundreds of inserts -> one refetch after they settle
-const POLL_MS = 60_000; //fallback refresh if realtime is off for the table
 
 //--------------------------------------------------------------------------------------------------------------
 //Hook
 //--------------------------------------------------------------------------------------------------------------
 
-// fetch + auto-refresh; pulse increments on each refresh after the first (drives the "updated" flash)
+// fetch once, then refetch only when Supabase reports a database change; pulse increments on each refresh after the first (drives the "updated" flash)
 //params: load (() => Promise<T>) - query to run; deps (DependencyList) - re-run when these change
 //output: { data: T | null, status: LiveStatus, error: string | null, pulse: number, loaded: boolean }
 export function useLive<T>(load: () => Promise<T>, deps: DependencyList) {
@@ -42,7 +41,7 @@ export function useLive<T>(load: () => Promise<T>, deps: DependencyList) {
   useEffect(() => {
     let alive = true;
     let timer: ReturnType<typeof setTimeout> | undefined;
-    let poll: ReturnType<typeof setInterval> | undefined;
+    let dropped = false; //true after the realtime connection fails, until it comes back
     let first = true;
     let mode: LiveStatus = isDemo ? "demo" : "loading"; //last known connection state, restored after an error clears
 
@@ -84,25 +83,21 @@ export function useLive<T>(load: () => Promise<T>, deps: DependencyList) {
         if (s === "SUBSCRIBED") {
           mode = "live";
           setStatus((p) => (p === "error" ? p : "live"));
+          //back after a drop -> one catch-up query, changes made while offline sent no event
+          if (dropped) schedule();
+          dropped = false;
         }
         if (s === "CHANNEL_ERROR" || s === "TIMED_OUT") {
-          //realtime unreachable -> plain timer refresh instead
-          mode = "polling";
-          setStatus((p) => (p === "error" ? p : "polling"));
-          clearInterval(poll);
-          poll = setInterval(run, POLL_MS);
+          //connection lost (sleep, wifi); supabase-js retries on its own, no timer refresh
+          dropped = true;
+          mode = "reconnecting";
+          setStatus((p) => (p === "error" ? p : "reconnecting"));
         }
       });
-
-    //also refresh when the tab regains focus (covers laptops waking from sleep)
-    const onFocus = () => document.visibilityState === "visible" && schedule();
-    document.addEventListener("visibilitychange", onFocus);
 
     return () => {
       alive = false;
       clearTimeout(timer);
-      clearInterval(poll);
-      document.removeEventListener("visibilitychange", onFocus);
       getClient().removeChannel(channel);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
