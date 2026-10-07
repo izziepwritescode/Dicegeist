@@ -231,3 +231,81 @@ Motion preferences (respect OS "reduce motion")
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
 }
+
+/*--------------------------------------------------------------------------------------------------------------
+Home v2: header, character panels, info panel
+--------------------------------------------------------------------------------------------------------------*/
+
+.home-head { display: flex; align-items: center; gap: 32px; margin-bottom: 40px; }
+.home-die { display: flex; flex-direction: column; align-items: center; flex-shrink: 0; }
+.home-die .d20-counter { width: clamp(110px, 15vw, 170px); }
+.home-die-caption { font-size: 0.8rem; color: var(--ink-2); letter-spacing: 0.08em; text-transform: uppercase; margin-top: 6px; }
+.home-eyebrow { display: flex; gap: 10px; row-gap: 6px; align-items: center; flex-wrap: wrap; }
+.home-title { font-size: clamp(2.5rem, 7vw, 4.5rem); line-height: 1; margin: 8px 0 14px; text-transform: uppercase; letter-spacing: 0.04em; }
+.home-rule { border: 0; height: 2px; background: linear-gradient(90deg, var(--accent), transparent); transform-origin: left; margin-bottom: 14px; max-width: 520px; }
+.home-desc { color: var(--ink-2); max-width: 60ch; }
+
+.home-body { display: grid; grid-template-columns: minmax(0, 1fr) 340px; gap: 24px; align-items: start; }
+
+/* panels: groups side by side, each group = panels + bracket */
+.panel-strip { display: flex; gap: 20px; min-height: 440px; }
+.panel-group { display: flex; flex-direction: column; flex-basis: 0; min-width: 0; }
+.panel-row { display: flex; gap: 12px; flex: 1; }
+.panel-wrap { flex-basis: 0; min-width: 0; display: flex; }
+
+.panel {
+  flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: space-between;
+  padding: 22px 8px 16px; min-height: 400px;
+  background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius);
+  transition: border-color 0.3s var(--ease), box-shadow 0.3s var(--ease), background 0.3s var(--ease);
+}
+.panel.is-active { border-color: var(--accent); background: color-mix(in srgb, var(--accent) 8%, var(--surface)); box-shadow: 0 16px 48px -16px var(--accent-glow); }
+.panel-name {
+  writing-mode: vertical-rl; text-orientation: upright; /* letters stacked top -> bottom, upright */
+  font-family: var(--font-display); font-weight: 600; text-transform: uppercase;
+  font-size: clamp(1.4rem, 2.6vw, 2.1rem); letter-spacing: 0.06em; line-height: 1;
+}
+.panel-foot { font-size: 0.8rem; color: var(--ink-2); font-variant-numeric: tabular-nums; }
+
+/* bracket under each platform group: bottom border + end ticks, label centred below */
+.panel-bracket {
+  position: relative; height: 14px; margin: 14px 4px 0;
+  border: 2px solid var(--ink-muted); border-top: 0; border-radius: 0 0 6px 6px;
+  transform-origin: center;
+}
+.panel-bracket span {
+  position: absolute; left: 50%; top: 100%; transform: translate(-50%, 6px);
+  font-size: 0.75rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink-2); white-space: nowrap;
+}
+
+/* info panel */
+.info-panel { position: relative; min-height: 400px; }
+.info-title { font-size: 1.6rem; margin: 4px 0 14px; }
+.info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 18px 12px; margin: 10px 0 16px; }
+.info-grid-3 { grid-template-columns: repeat(3, 1fr); }
+.info-value { font-size: 1.6rem; font-weight: 600; line-height: 1.1; font-variant-numeric: tabular-nums; }
+.info-value-lg { font-size: 2.4rem; }
+.info-label { font-size: 0.8rem; color: var(--ink-2); }
+.info-skills { display: grid; gap: 8px; margin: 4px 0 16px; font-size: 0.875rem; }
+.info-skills dt { font-size: 0.75rem; color: var(--ink-muted); text-transform: uppercase; letter-spacing: 0.06em; }
+.info-skills dd span { color: var(--ink-2); font-variant-numeric: tabular-nums; margin-left: 4px; }
+.info-hint { font-size: 0.8rem; color: var(--ink-muted); }
+.info-link { display: inline-block; color: var(--accent); }
+.info-link:hover { text-decoration: underline; }
+
+/* tablet: info panel drops below the panels */
+@media (max-width: 900px) {
+  .home-body { grid-template-columns: 1fr; }
+  .info-panel { min-height: 0; }
+}
+
+/* phone: panels become horizontal strips, groups stacked */
+@media (max-width: 560px) {
+  .home-head { gap: 16px; align-items: flex-start; }
+  .home-die .d20-counter { width: 92px; }
+  .panel-strip { flex-direction: column; min-height: 0; gap: 34px; }
+  .panel-row { flex-direction: column; gap: 10px; }
+  .panel-wrap { flex: none !important; }
+  .panel { flex-direction: row; min-height: 0; padding: 16px 18px; }
+  .panel-name { writing-mode: horizontal-tb; font-size: 1.4rem; }
+}
