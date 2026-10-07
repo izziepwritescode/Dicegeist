@@ -3,7 +3,7 @@
 //--------------------------------------------------------------------------------------------------------------
 // Outline
 //   Types
-//     CharacterCard / SkillStat / FaceStat / CharacterDetail
+//     CharacterCard / SkillPick / SkillStat / FaceStat / CharacterDetail
 //   Client
 //     isDemo / getClient
 //   Queries
@@ -11,6 +11,7 @@
 //     fetchCharacterDetail
 //   Helpers
 //     num
+//     pickSkills
 //--------------------------------------------------------------------------------------------------------------
 
 import { createClient, type SupabaseClient } from "@supabase/supabase-js"; //browser client for Supabase REST + realtime
@@ -32,7 +33,17 @@ export type CharacterCard = {
   nat1s: number;
   successRate: number | null; //known-DC rolls only
   lastRollAt: string | null;
+  platform: string | null; //roll20 / foundry; from rolls.platform
+  bestSkill: SkillPick | null; //highest avg d20, skills with >= MIN_SKILL_ROLLS only
+  worstSkill: SkillPick | null;
+  attacks: number | null; //attack rolls; null until character_combat_summary exists
+  spellsCast: number | null;
+  totalDamage: number | null; //sum of damage roll totals
 };
+
+export type SkillPick = { name: string; avgD20: number; rollCount: number };
+
+const MIN_SKILL_ROLLS = 5; //fewer rolls -> average too noisy to call best/worst
 
 export type SkillStat = {
   code: string | null;
@@ -82,18 +93,35 @@ export async function fetchCharacters(): Promise<CharacterCard[]> {
   if (isDemo) return demoCharacters();
   const sb = getClient();
 
-  //two reads, joined here; same as a LEFT JOIN characters -> character_roll_summary
-  const [chars, sums] = await Promise.all([
+  //four reads, joined here; same as LEFT JOINs from characters on character_id
+  const [chars, sums, skills, lookup] = await Promise.all([
     sb.from("characters").select("id, name, campaign, class_name, is_npc"),
     sb.from("character_roll_summary").select("*"),
+    sb.from("skill_roll_stats").select("character_id, skill_code, roll_count, avg_natural_d20"),
+    sb.from("skills_abilities").select("code, name"),
   ]);
-  if (chars.error) throw chars.error;
-  if (sums.error) throw sums.error;
+  for (const r of [chars, sums, skills, lookup]) if (r.error) throw r.error;
+  const visible = chars.data!.filter((c) => !c.is_npc);
 
-  const byId = new Map(sums.data.map((s) => [s.character_id as number, s])); //lookup like XLOOKUP on character_id
-  return chars.data
-    .filter((c) => !c.is_npc)
-    .map((c) => toCard(c, byId.get(c.id)))
+  //platform: one roll per character is enough (limit 1, like TOP 1)
+  const plats = await Promise.all(
+    visible.map((c) => sb.from("rolls").select("platform").eq("character_id", c.id).limit(1).maybeSingle()),
+  );
+  //combat totals; error (view not created yet) -> blanks, rest of the page still loads
+  const combat = await sb.from("character_combat_summary").select("character_id, attacks, spells_cast, total_damage");
+  const combatById = new Map((combat.error ? [] : combat.data!).map((r) => [r.character_id as number, r]));
+
+  const byId = new Map(sums.data!.map((s) => [s.character_id as number, s])); //lookup like XLOOKUP on character_id
+  const names = new Map(lookup.data!.map((s) => [s.code as string, s.name as string]));
+  return visible
+    .map((c, i) => ({
+      ...toCard(c, byId.get(c.id)),
+      platform: (plats[i].data?.platform as string) ?? null,
+      attacks: num(combatById.get(c.id)?.attacks),
+      spellsCast: num(combatById.get(c.id)?.spells_cast),
+      totalDamage: num(combatById.get(c.id)?.total_damage),
+      ...pickSkills(skills.data!.filter((s) => s.character_id === c.id), names),
+    }))
     .sort((a, b) => b.rollCount - a.rollCount);
 }
 
@@ -171,5 +199,24 @@ function toCard(c: any, s?: any): CharacterCard {
     nat1s: num(s?.nat_1s) ?? 0,
     successRate: num(s?.success_rate),
     lastRollAt: s?.last_roll_at ?? null,
+    platform: null,
+    bestSkill: null,
+    worstSkill: null,
+    attacks: null,
+    spellsCast: null,
+    totalDamage: null,
   };
+}
+
+// best + worst skill by avg natural d20; unlabelled checks and thin samples skipped
+//params: rows (skill_roll_stats rows for one character); names (Map code -> display name)
+//output: { bestSkill, worstSkill } - SkillPick or null each
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function pickSkills(rows: any[], names: Map<string, string>): { bestSkill: SkillPick | null; worstSkill: SkillPick | null } {
+  const ok = rows
+    .filter((r) => r.skill_code && (num(r.roll_count) ?? 0) >= MIN_SKILL_ROLLS && num(r.avg_natural_d20) !== null)
+    .map((r) => ({ name: names.get(r.skill_code) ?? r.skill_code, avgD20: num(r.avg_natural_d20)!, rollCount: num(r.roll_count)! }))
+    .sort((a, b) => b.avgD20 - a.avgD20); //highest first
+  if (ok.length === 0) return { bestSkill: null, worstSkill: null };
+  return { bestSkill: ok[0], worstSkill: ok.length > 1 ? ok[ok.length - 1] : null };
 }

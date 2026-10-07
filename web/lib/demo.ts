@@ -34,9 +34,10 @@ function rng(seed: number): () => number {
 //--------------------------------------------------------------------------------------------------------------
 
 const CHARS = [
-  { id: 1, name: "Demo Warlock", campaign: "Sample Campaign A", className: "Warlock", rolls: 900 },
-  { id: 2, name: "Demo Paladin", campaign: "Sample Campaign B", className: "Paladin", rolls: 700 },
-  { id: 3, name: "Demo Sorcerer", campaign: "Sample Campaign C", className: "Sorcerer", rolls: 520 },
+  { id: 1, name: "Lazlo", campaign: "Sample Campaign A", className: "Warlock", rolls: 900, platform: "roll20" },
+  { id: 2, name: "Vasha", campaign: "Sample Campaign B", className: "Paladin", rolls: 700, platform: "roll20" },
+  { id: 3, name: "Idris Ildroun", campaign: "Sample Campaign C", className: "Cleric", rolls: 720, platform: "foundry" },
+  { id: 4, name: "Ivan Maddock", campaign: "Sample Campaign D", className: "Sorcerer", rolls: 520, platform: "foundry" },
 ];
 
 const SKILLS = ["perception", "insight", "stealth", "arcana", "athletics", "persuasion", "investigation", "deception"];
@@ -70,9 +71,17 @@ export function demoCharacters(): CharacterCard[] {
       nat1s: f[0],
       successRate: null,
       lastRollAt: new Date().toISOString(),
+      platform: c.platform,
+      bestSkill: { name: SKILL_NAMES[c.id % 8], avgD20: 12.4 + c.id * 0.3, rollCount: 14 },
+      worstSkill: { name: SKILL_NAMES[(c.id + 3) % 8], avgD20: 8.9 - c.id * 0.2, rollCount: 11 },
+      attacks: Math.round(c.rolls * 0.3),
+      spellsCast: Math.round(c.rolls * (0.12 + c.id * 0.04)),
+      totalDamage: Math.round(c.rolls * 2.6),
     };
   });
 }
+
+const SKILL_NAMES = ["Perception", "Insight", "Stealth", "Arcana", "Athletics", "Persuasion", "Investigation", "Deception"];
 
 // one demo character's breakdown
 //params: id (number) - demo character id

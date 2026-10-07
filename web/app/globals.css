@@ -1,8 +1,8 @@
-/* site-wide tokens + base styles; dark is the designed default, light follows the OS */
+/* site-wide tokens + base styles; main palette (light sea-glass), character pages override tokens via lib/themes.ts */
 /* Usage Syntax: imported once by app/layout.tsx */
 /*--------------------------------------------------------------------------------------------------------------
   Outline
-    Tokens (dark default / light override)
+    Tokens (main palette)
     Base
     Layout shell
     Shared pieces: card, eyebrow, pill, live badge, stat tile, chart, table, buttons
@@ -14,50 +14,34 @@ Tokens
 --------------------------------------------------------------------------------------------------------------*/
 
 :root {
-  color-scheme: dark;
-  --page: #0d0d0d;
-  --surface: #1a1a19;
-  --surface-2: #232321;
-  --border: rgba(255, 255, 255, 0.1);
-  --border-strong: rgba(255, 255, 255, 0.18);
-  --ink: #ffffff;
-  --ink-2: #c3c2b7;
-  --ink-muted: #898781;
-  --grid: #2c2c2a;
-  --axis: #383835;
+  color-scheme: light;
+  /* main palette: sea-glass band d2e3ea / b2cfd5 / 9bbbc6; inks are deep slate from the same hue */
+  --page: #d2e3ea;
+  --surface: #e4eff3;         /* lifted tint of the page, used for blocks (no outlines) */
+  --surface-2: #b2cfd5;
+  --border: transparent;      /* clean look: blocks separate by fill, never by outline */
+  --border-strong: transparent;
+  --ink: #14303a;
+  --ink-2: #3d5862;
+  --ink-muted: #5a7480;
+  --grid: #b2cfd5;
+  --axis: #9bbbc6;
 
-  --accent: #9085e9;          /* violet, categorical slot 7 dark step */
-  --accent-glow: rgba(144, 133, 233, 0.22);
-  --above: #3987e5;           /* diverging pole: luckier than fair (blue) */
-  --below: #e66767;           /* diverging pole: unluckier than fair (red) */
-  --good: #0ca30c;            /* status good: nat 20 */
-  --critical: #d03b3b;        /* status critical: nat 1 */
+  --accent: #2f5b69;          /* deep sea-glass: rule, links, d20 */
+  --accent-glow: rgba(47, 91, 105, 0.18);
+  --metric: var(--ink);       /* key numbers; character themes swap in their accent */
+  --bar: var(--accent);       /* chart bars */
+  --above: #2a78d6;           /* diverging pole: luckier than fair */
+  --below: #e34948;           /* diverging pole: unluckier than fair */
+  --good: #0ca30c;            /* nat 20 */
+  --critical: #d03b3b;        /* nat 1 */
+  --shadow: 0 10px 30px -14px rgba(20, 48, 58, 0.35);
 
   --radius: 16px;
   --radius-sm: 10px;
   --ease: cubic-bezier(0.22, 1, 0.36, 1);
   --font-sans: var(--font-inter), system-ui, -apple-system, "Segoe UI", sans-serif;
   --font-display: var(--font-fraunces), Georgia, serif;
-}
-
-@media (prefers-color-scheme: light) {
-  :root:not([data-theme="dark"]) {
-    color-scheme: light;
-    --page: #f9f9f7;
-    --surface: #fcfcfb;
-    --surface-2: #f0efec;
-    --border: rgba(11, 11, 11, 0.1);
-    --border-strong: rgba(11, 11, 11, 0.18);
-    --ink: #0b0b0b;
-    --ink-2: #52514e;
-    --ink-muted: #6f6e69;
-    --grid: #e1e0d9;
-    --axis: #c3c2b7;
-    --accent: #4a3aa7;
-    --accent-glow: rgba(74, 58, 167, 0.12);
-    --above: #2a78d6;
-    --below: #e34948;
-  }
 }
 
 /*--------------------------------------------------------------------------------------------------------------
@@ -70,6 +54,7 @@ html, body { max-width: 100vw; overflow-x: hidden; }
 
 body {
   background: var(--page);
+  transition: background-color 0.5s var(--ease), color 0.5s var(--ease); /* character theme fades in */
   color: var(--ink);
   font-family: var(--font-sans);
   line-height: 1.5;
@@ -78,6 +63,7 @@ body {
 }
 
 /* soft violet glow behind the header, fixed so it does not scroll */
+/* soft accent glow at the top of every page, fixed so it does not scroll */
 body::before {
   content: "";
   position: fixed;
@@ -87,6 +73,9 @@ body::before {
   pointer-events: none;
   z-index: -1;
 }
+
+/* home: hero block, plain page background */
+.home-band { padding: 8px 0 40px; }
 
 a { color: inherit; text-decoration: none; }
 
@@ -99,16 +88,6 @@ Layout shell
 --------------------------------------------------------------------------------------------------------------*/
 
 .shell { width: 100%; max-width: 1120px; margin: 0 auto; padding: 0 16px; }
-
-.site-header {
-  position: sticky; top: 0; z-index: 10;
-  backdrop-filter: blur(12px) saturate(140%);
-  background: color-mix(in srgb, var(--page) 70%, transparent);
-  border-bottom: 1px solid var(--border);
-}
-.site-header .shell { display: flex; align-items: center; justify-content: space-between; height: 60px; }
-.wordmark { font-family: var(--font-display); font-size: 1.25rem; font-weight: 600; display: flex; gap: 10px; align-items: center; }
-.wordmark svg { color: var(--accent); }
 
 .site-footer { color: var(--ink-muted); font-size: 0.85rem; padding: 48px 0 32px; text-align: center; }
 
@@ -139,20 +118,19 @@ Shared pieces
 
 .card {
   background: var(--surface);
-  border: 1px solid var(--border);
   border-radius: var(--radius);
   padding: 20px;
 }
 
 .card-link { display: block; position: relative; transition: border-color 0.3s var(--ease), box-shadow 0.3s var(--ease); }
-.card-link:hover { border-color: var(--border-strong); box-shadow: 0 12px 40px -12px var(--accent-glow); }
+.card-link:hover { box-shadow: var(--shadow); }
 
 .eyebrow { font-size: 0.75rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink-muted); font-weight: 600; }
 
 .pill {
   display: inline-flex; align-items: center; gap: 6px;
   font-size: 0.75rem; color: var(--ink-2);
-  border: 1px solid var(--border); border-radius: 999px; padding: 3px 10px;
+  background: var(--surface); border-radius: 999px; padding: 3px 10px;
   white-space: nowrap;
 }
 
@@ -166,7 +144,7 @@ Shared pieces
 @keyframes ping { 0% { transform: scale(1); opacity: 0.7; } 100% { transform: scale(3); opacity: 0; } }
 
 .stats-row { display: grid; gap: 12px; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); margin-bottom: 20px; }
-.stat-value { font-size: 2rem; font-weight: 600; line-height: 1.1; margin-top: 4px; }
+.stat-value { font-size: 2rem; font-weight: 700; line-height: 1.1; margin-top: 4px; color: var(--metric); }
 .stat-sub { font-size: 0.8rem; color: var(--ink-2); margin-top: 4px; }
 
 .section { margin-top: 20px; }
@@ -182,7 +160,7 @@ Shared pieces
 
 .tooltip {
   position: absolute; pointer-events: none; z-index: 5;
-  background: var(--surface-2); border: 1px solid var(--border-strong); border-radius: var(--radius-sm);
+  background: var(--surface-2); border-radius: var(--radius-sm);
   padding: 8px 10px; font-size: 0.8rem; white-space: nowrap;
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
   transform: translate(-50%, calc(-100% - 10px));
@@ -203,7 +181,7 @@ Shared pieces
 
 .toggle {
   font: inherit; font-size: 0.8rem; color: var(--ink-2); cursor: pointer;
-  background: transparent; border: 1px solid var(--border); border-radius: 999px; padding: 4px 12px;
+  background: var(--surface-2); border: 0; border-radius: 999px; padding: 4px 12px;
   transition: background 0.2s var(--ease), color 0.2s var(--ease);
 }
 .toggle:hover { background: var(--surface-2); color: var(--ink); }
@@ -216,7 +194,7 @@ Shared pieces
 
 .demo-banner {
   font-size: 0.8rem; color: var(--ink-2); text-align: center;
-  padding: 8px 16px; border-bottom: 1px solid var(--border); background: var(--surface);
+  padding: 8px 16px; background: var(--surface);
 }
 
 /* "updated" flash after a live refresh */
@@ -230,4 +208,88 @@ Motion preferences (respect OS "reduce motion")
 
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+}
+
+/*--------------------------------------------------------------------------------------------------------------
+Home v2: header, character panels, info panel
+--------------------------------------------------------------------------------------------------------------*/
+
+.home-head { display: flex; align-items: center; gap: 32px; margin-bottom: 28px; }
+.home-die { display: flex; flex-direction: column; align-items: center; flex-shrink: 0; }
+.home-die .d20-counter { width: clamp(110px, 15vw, 170px); }
+.home-die-caption { font-size: 0.8rem; color: var(--ink-2); letter-spacing: 0.08em; text-transform: uppercase; margin-top: 6px; }
+.home-eyebrow { display: flex; gap: 10px; row-gap: 6px; align-items: center; flex-wrap: wrap; }
+.home-title { font-size: clamp(2.5rem, 7vw, 4.5rem); line-height: 1; margin: 8px 0 14px; text-transform: uppercase; letter-spacing: 0.04em; }
+.home-rule { border: 0; height: 2px; background: linear-gradient(90deg, var(--accent), transparent); transform-origin: left; margin-bottom: 14px; max-width: 520px; }
+.home-desc { color: var(--ink-2); max-width: 60ch; }
+
+.home-body { display: grid; grid-template-columns: minmax(0, 1fr) 340px; gap: 24px; align-items: start; }
+
+/* panels: groups side by side, each group = panels + bracket */
+.panel-strip { display: flex; gap: 20px; min-height: 440px; }
+.panel-group { display: flex; flex-direction: column; flex-basis: 0; min-width: 0; }
+.panel-row { display: flex; gap: 12px; flex: 1; }
+.panel-wrap { flex: 1 1 0; min-width: 0; display: flex; }
+
+/* panel fill = character ramp, light mid-tone at top fading to darkest at the foot; no outline */
+.panel {
+  flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: space-between;
+  padding: 22px 8px 16px; min-height: 400px; color: #ffffff;
+  background: linear-gradient(180deg, var(--c3, #3d5862) 0%, var(--c1, #14303a) 85%);
+  border-radius: 6px; /* small bevel */
+  box-shadow: 0 6px 18px -12px rgba(20, 48, 58, 0.5);
+  transition: box-shadow 0.35s var(--ease), filter 0.35s var(--ease);
+}
+.panel.is-active { box-shadow: 0 22px 44px -18px rgba(20, 48, 58, 0.65); filter: saturate(1.15); }
+.panel-name {
+  writing-mode: vertical-rl; text-orientation: upright; /* letters stacked top -> bottom, upright */
+  font-family: var(--font-display); font-weight: 600; text-transform: uppercase;
+  font-size: clamp(1.4rem, 2.6vw, 2.1rem); letter-spacing: 0.06em; line-height: 1;
+}
+.panel-foot { display: flex; flex-direction: column; align-items: center; gap: 2px; text-align: center; line-height: 1.25; }
+.panel-class { font-size: 1rem; font-weight: 800; color: var(--accent); } /* accent on darkest ramp step */
+.panel-campaign { font-size: 0.75rem; color: var(--c5); }
+
+/* bracket under each platform group: bottom border + end ticks, label centred below */
+.panel-bracket {
+  position: relative; height: 14px; margin: 14px 4px 0;
+  border: 2px solid var(--ink-muted); border-top: 0; border-radius: 0 0 6px 6px;
+  transform-origin: center;
+}
+.panel-bracket span {
+  position: absolute; left: 50%; top: 100%; transform: translate(-50%, 6px);
+  font-size: 0.75rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink-2); white-space: nowrap;
+}
+
+/* info panel */
+.info-panel { position: relative; min-height: 400px; border-radius: 6px; background: var(--surface-2); transition: background-color 0.4s var(--ease), color 0.4s var(--ease); }
+.info-title { font-size: 1.6rem; margin: 4px 0 14px; }
+.info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 18px 12px; margin: 10px 0 16px; }
+.info-wide { grid-column: 1 / -1; } /* odd last stat spans both columns */
+.info-value { font-size: 1.6rem; font-weight: 700; line-height: 1.1; font-variant-numeric: tabular-nums; color: var(--metric); }
+.info-label { font-size: 0.8rem; color: var(--ink-2); }
+.info-skills { display: grid; gap: 8px; margin: 4px 0 16px; font-size: 0.875rem; }
+.info-skills dt { font-size: 0.75rem; color: var(--ink-muted); text-transform: uppercase; letter-spacing: 0.06em; }
+.info-skills dd span { color: var(--ink-2); font-variant-numeric: tabular-nums; margin-left: 4px; }
+.info-hint { font-size: 0.8rem; color: var(--ink-muted); }
+.info-link { display: inline-block; color: var(--accent); }
+.info-link:hover { text-decoration: underline; }
+
+/* tablet: info panel drops below the panels */
+@media (max-width: 900px) {
+  .home-body { grid-template-columns: 1fr; }
+  .info-panel { min-height: 0; }
+}
+
+/* phone: panels become horizontal strips, groups stacked */
+@media (max-width: 560px) {
+  .home-head { gap: 16px; align-items: flex-start; }
+  .home-die .d20-counter { width: 92px; }
+  .home-title { font-size: clamp(1.5rem, 7.6vw, 2.4rem); letter-spacing: 0.02em; } /* "CALCULATED" must fit beside the die */
+  .panel-strip { flex-direction: column; min-height: 0; gap: 34px; }
+  .panel-row { flex-direction: column; gap: 10px; }
+  .panel-wrap { flex: none !important; }
+  .panel { flex-direction: row; min-height: 0; padding: 16px 18px; }
+  .panel-name { writing-mode: horizontal-tb; font-size: 1.4rem; }
+  .panel-foot { align-items: flex-end; text-align: right; }
 }

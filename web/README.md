@@ -36,13 +36,14 @@ Never put the `service_role` / secret key in this app: anything `NEXT_PUBLIC_` s
   update public.characters set is_public = true where id in (1, 2, 3, 4);
   ```
 - Live push updates: run `supabase/migrations/20261007180000_realtime_rolls.sql` once. Without it -> no change events, page only updates on reload.
+- Attacks / spells cast / total damage on the home panel: run `supabase/migrations/20261007200000_character_combat_summary.sql` once. Without it -> those stats show a dash.
 
 ## Layout
 
 ```
 web/
   app/
-    layout.tsx              root shell: fonts, header, footer, demo banner
+    layout.tsx              root shell: fonts, footer, demo banner
     template.tsx            page transition (fade + rise on every navigation)
     page.tsx                "/" character cards + totals
     character/[id]/page.tsx "/character/1" detail: tiles, d20 face chart, skill chart

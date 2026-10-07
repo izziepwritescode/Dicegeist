@@ -16,6 +16,7 @@ import { useLive } from "@/lib/useLive"; //auto-refresh on new rolls
 import { FAIR_D20, LiveBadge, StatTile } from "@/components/ui";
 import { FaceChart } from "@/components/FaceChart";
 import { SkillChart } from "@/components/SkillChart";
+import { useCharacterTheme } from "@/lib/themes"; //character palette on the whole page
 
 //--------------------------------------------------------------------------------------------------------------
 //Page
@@ -27,6 +28,8 @@ export default function CharacterPage() {
   const { id } = useParams<{ id: string }>();
   const charId = Number(id);
   const { data, status, error, loaded } = useLive(() => fetchCharacterDetail(charId), [charId]);
+
+  useCharacterTheme(data?.card.name); //page, header and charts take the character's ramp + accent
 
   const rise = { hidden: { opacity: 0, y: 14 }, show: { opacity: 1, y: 0 } }; //shared entrance variant
 
