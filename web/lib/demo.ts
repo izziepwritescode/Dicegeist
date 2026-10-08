@@ -148,6 +148,7 @@ function demoSheet(card: CharacterCard): CharacterSheet {
     })),
     attacks: {
       basis: roll20 ? { loggedAC: 0, damageEvidence: 50, slider: 0 } : { loggedAC: 19, damageEvidence: 31, slider: 0 },
+      streaks: { hit: { length: 9, from: "2025-03-04", to: "2025-03-18" }, miss: { length: 4, from: "2025-06-10", to: "2025-06-10" } },
       sources: [
         { source: "Spiritual Weapon", attacks: 31, hits: 19 },
         { source: "Guiding Bolt", attacks: 10, hits: 8 },

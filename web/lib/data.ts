@@ -77,6 +77,9 @@ export type SheetAbility = {
 };
 export type SheetSpell = { name: string; minLevel: number | null; maxLevel: number | null; casts: number; damage: number; healing: number };
 export type SheetNight = { date: string; d20s: number; avgD20: number | null; expectedD20: number | null; nat20s: number; nat1s: number };
+//one streak: how many attacks in a row, first + last play date (yyyy-mm-dd)
+export type SheetStreak = { length: number; from: string; to: string };
+
 export type CharacterSheet = {
   kpis: {
     rolls: number; d20s: number; nat20s: number; nat1s: number;
@@ -89,6 +92,7 @@ export type CharacterSheet = {
   attacks: {
     basis: { loggedAC: number; damageEvidence: number; slider: number }; //how each hit was decided
     sources: { source: string; attacks: number; hits: number }[];
+    streaks?: { hit?: SheetStreak; miss?: SheetStreak }; //longest run of hits / misses in a row
   };
   damageTypes: { type: string; source: "Spell" | "Weapon"; rolls: number; damage: number }[];
   damage: { rolls: number; avg: number | null; spellAvg: number | null; weaponAvg: number | null; biggest: number | null; diceLuck: number | null };

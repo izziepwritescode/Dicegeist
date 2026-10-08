@@ -45,7 +45,7 @@ const DAMAGE_COLORS: Record<string, string> = {
   Slashing:    "#c43a52", //crimson
   Thunder:     "#6c7bd9", //indigo
 };
-const UNTYPED_COLOR = "#8a8a8a"; //Untyped + anything not in the map
+const UNTYPED_COLOR = "#8a8a8a"; //any type not in the map
 
 //--------------------------------------------------------------------------------------------------------------
 //Shared
@@ -239,6 +239,20 @@ export function AttackSplit({ attacks, total, hits }: { attacks: CharacterSheet[
               right={`${s.hits}/${s.attacks} · ${pct(s.hits, s.attacks, 0)}`}
             />
           ))}
+          {attacks.streaks && (
+            <div className="nights">
+              {([["hit", "Longest hit streak", "var(--good)"], ["miss", "Longest miss streak", "var(--critical)"]] as const).map(([k, title, c]) => {
+                const st = attacks.streaks?.[k];
+                return st ? (
+                  <div className="night" key={k}>
+                    <div className="night-k">{title}</div>
+                    <div className="night-d" style={{ color: c }}>{st.length} in a row</div>
+                    <div className="night-k">{st.from === st.to ? st.from : `${st.from} to ${st.to}`}</div>
+                  </div>
+                ) : null;
+              })}
+            </div>
+          )}
         </>
       ) : (
         <p className="card-empty">No attack rolls yet.</p>
@@ -247,10 +261,19 @@ export function AttackSplit({ attacks, total, hits }: { attacks: CharacterSheet[
   );
 }
 
-// damage per type, each type in its own colour; spell / weapon tag after each type
-//params: types (CharacterSheet["damageTypes"]) - sorted by damage desc
+// damage per type, each type in its own colour; spell + weapon rows of the same type merged, untyped left out
+//params: rows (CharacterSheet["damageTypes"]) - one row per type + source
 //output: JSX.Element
-export function DamageByType({ types }: { types: CharacterSheet["damageTypes"] }) {
+export function DamageByType({ types: rows }: { types: CharacterSheet["damageTypes"] }) {
+  const byType = new Map<string, { type: string; rolls: number; damage: number }>(); //group by type, like SUM ... GROUP BY damage_type
+  for (const r of rows) {
+    if (r.type === "Untyped") continue; //no damage type logged -> left off this chart
+    const t = byType.get(r.type) ?? { type: r.type, rolls: 0, damage: 0 };
+    t.rolls += r.rolls;
+    t.damage += r.damage;
+    byType.set(r.type, t);
+  }
+  const types = [...byType.values()].sort((a, b) => b.damage - a.damage); //biggest first
   const total = types.reduce((a, t) => a + t.damage, 0);
   const rolls = types.reduce((a, t) => a + t.rolls, 0);
   const color = (type: string) => DAMAGE_COLORS[type] ?? UNTYPED_COLOR;
@@ -260,7 +283,7 @@ export function DamageByType({ types }: { types: CharacterSheet["damageTypes"] }
       <div className="section-head">
         <div>
           <h2>Damage by type</h2>
-          <p>{fmt(total)} damage across {fmt(rolls)} damage rolls</p>
+          <p>{fmt(total)} damage across {fmt(rolls)} rolls with a damage type</p>
         </div>
       </div>
       {total ? (
@@ -268,8 +291,8 @@ export function DamageByType({ types }: { types: CharacterSheet["damageTypes"] }
           <SplitBar parts={types.map((t) => ({ value: t.damage, color: color(t.type), label: pct(t.damage, total, 0), ink: ink(t.type) }))} />
           {types.map((t) => (
             <BarRow
-              key={`${t.type}-${t.source}`}
-              label={<>{t.type} <small>{t.source}</small></>}
+              key={t.type}
+              label={t.type}
               value={t.damage}
               max={types[0].damage}
               color={color(t.type)}
