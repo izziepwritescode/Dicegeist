@@ -35,10 +35,10 @@ function rng(seed: number): () => number {
 //--------------------------------------------------------------------------------------------------------------
 
 const CHARS = [
-  { id: 1, name: "Lazlo", campaign: "Sample Campaign A", className: "Warlock", rolls: 900, platform: "roll20" },
-  { id: 2, name: "Vasha", campaign: "Sample Campaign B", className: "Paladin", rolls: 700, platform: "roll20" },
-  { id: 3, name: "Idris Ildroun", campaign: "Sample Campaign C", className: "Cleric", rolls: 720, platform: "foundry" },
-  { id: 4, name: "Ivan Maddock", campaign: "Sample Campaign D", className: "Sorcerer", rolls: 520, platform: "foundry" },
+  { id: 1, name: "Lazlo Remény-Benedek", campaign: "Sample Campaign A", className: "Warlock", subclass: "Hexblade", level: 12, rolls: 900, platform: "roll20" },
+  { id: 2, name: "Vasha Klenova", campaign: "Sample Campaign B", className: "Paladin", subclass: "Vengeance", level: 10, rolls: 700, platform: "roll20" },
+  { id: 3, name: "Idris Ildroun", campaign: "Sample Campaign C", className: "Cleric", subclass: "Twilight", level: 9, rolls: 720, platform: "foundry" },
+  { id: 4, name: "Ivan Maddock", campaign: "Sample Campaign D", className: "Sorcerer", subclass: "Spellfire", level: 6, rolls: 520, platform: "foundry" },
 ];
 
 const SKILLS = ["perception", "insight", "stealth", "arcana", "athletics", "persuasion", "investigation", "deception"];
@@ -65,6 +65,8 @@ export function demoCharacters(): CharacterCard[] {
       name: c.name,
       campaign: c.campaign,
       className: c.className,
+      subclass: c.subclass,
+      level: c.level,
       rollCount: c.rolls,
       d20Count: n,
       avgD20: Math.round(avg * 100) / 100,
@@ -148,6 +150,7 @@ function demoSheet(card: CharacterCard): CharacterSheet {
     })),
     attacks: {
       basis: roll20 ? { loggedAC: 0, damageEvidence: 50, slider: 0 } : { loggedAC: 19, damageEvidence: 31, slider: 0 },
+      streaks: { hit: { length: 9, from: "2025-03-04", to: "2025-03-18" }, miss: { length: 4, from: "2025-06-10", to: "2025-06-10" } },
       sources: [
         { source: "Spiritual Weapon", attacks: 31, hits: 19 },
         { source: "Guiding Bolt", attacks: 10, hits: 8 },

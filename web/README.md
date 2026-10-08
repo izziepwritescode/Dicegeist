@@ -54,6 +54,7 @@ web/
     FaceChart.tsx           d20 face distribution vs fair 5%
     SkillChart.tsx          per-skill avg d20, diverging around 10.5
     SheetSections.tsx       character_sheet() sections: tiles, abilities, attacks, damage, spells, play nights
+    CharacterHeader.tsx     character page header: splash art (public/art/<first name>.jpg) or tinted placeholder
     MotionRoot.tsx          respects OS reduce-motion
   lib/
     data.ts                 Supabase client + queries -> typed rows

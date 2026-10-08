@@ -147,10 +147,14 @@ Shared pieces
 @keyframes ping { 0% { transform: scale(1); opacity: 0.7; } 100% { transform: scale(3); opacity: 0; } }
 
 .stats-row { display: grid; gap: 12px; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); margin-bottom: 20px; }
-.stats-row-8 { grid-template-columns: repeat(8, minmax(0, 1fr)); gap: 10px; }
-.stats-row-8 .card { padding: 14px 12px; }
+.stats-row-8 { grid-template-columns: repeat(var(--tiles, 8), minmax(0, 1fr)); gap: 10px; } /* 7 for roll20 (no healing) */
+.stats-row-8 .card { padding: 14px 8px; text-align: center; }
+.stats-row-8 .eyebrow { white-space: nowrap; letter-spacing: 0.04em; } /* one-line titles */
 @media (max-width: 1000px) { .stats-row-8 { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
-@media (max-width: 520px) { .stats-row-8 { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 520px) {
+  .stats-row-8 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .stats-row-8 > :last-child:nth-child(odd) { grid-column: span 2; } /* odd count -> last tile full width, no orphan */
+}
 .stats-row-8 .stat-value { font-size: 1.6rem; }
 .stat-value { font-size: 2rem; font-weight: 700; line-height: 1.1; margin-top: 4px; color: var(--metric); }
 .stat-sub { font-size: 0.8rem; color: var(--ink-2); margin-top: 4px; }
@@ -331,19 +335,85 @@ Character sheet sections (components/SheetSections.tsx); colours all come from t
 .bar-track i { display: block; height: 100%; border-radius: 999px; }
 .bar-num { color: var(--ink-2); font-size: 0.78rem; font-variant-numeric: tabular-nums; white-space: nowrap; }
 
-/* abilities array: six blocks on the darkest ramp step so every accent stays readable, no outlines */
+/* abilities: stat-block row, six cells on the darkest ramp step so every accent stays readable, no outlines */
 .abil-grid { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 10px; }
 @media (max-width: 700px) { .abil-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
-.abil { background: var(--page); border-radius: var(--radius-sm); padding: 12px 6px; text-align: center; }
-.abil-code { color: var(--accent); font-weight: 700; font-size: 0.85rem; letter-spacing: 0.06em; }
-.abil-score { font-size: 1.6rem; font-weight: 700; line-height: 1.2; }
-.abil-note { color: var(--ink-2); font-size: 0.72rem; }
-.abil-stats { display: flex; justify-content: center; gap: 14px; margin: 8px 0 4px; }
-.abil-stats b { display: block; font-size: 1rem; color: var(--metric); font-variant-numeric: tabular-nums; }
-.abil-stats span { font-size: 0.68rem; color: var(--ink-muted); }
+.abil { background: var(--page); border-radius: var(--radius-sm); padding: 14px 10px 12px; text-align: center; }
+.abil-code { font-size: 0.75rem; letter-spacing: 0.1em; color: var(--ink-2); font-weight: 700; }
+.abil-score { font-family: var(--font-display); font-size: 2.2rem; line-height: 1.1; }
+.abil-mod { display: inline-block; margin: 2px 0 10px; padding: 1px 10px; border-radius: 999px; background: var(--surface-2); font-size: 0.8rem; font-weight: 700; }
+.abil-gauge { position: relative; height: 6px; border-radius: 999px; background: var(--surface-2); }
+.abil-fair { position: absolute; left: 50%; top: -3px; bottom: -3px; width: 1px; background: var(--ink-muted); }
+.abil-fill { position: absolute; top: 0; bottom: 0; border-radius: 999px; }
+.abil-luck { font-size: 0.78rem; color: var(--ink-2); margin-top: 8px; font-variant-numeric: tabular-nums; }
+.abil-luck b { font-size: 1rem; color: var(--ink); }
+.abil-vs { font-size: 0.8rem; font-weight: 700; font-variant-numeric: tabular-nums; }
+.abil-sub { font-size: 0.7rem; color: var(--ink-muted); }
 
 /* best / worst night boxes */
 .nights { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px; }
 .night { background: var(--page); border-radius: var(--radius-sm); padding: 10px 12px; }
 .night-k { color: var(--ink-2); font-size: 0.75rem; }
 .night-d { font-weight: 700; font-size: 1.05rem; font-variant-numeric: tabular-nums; }
+
+/*--------------------------------------------------------------------------------------------------------------
+  Character header: splash art band, white text (art from web/public/art; tinted placeholder otherwise)
+--------------------------------------------------------------------------------------------------------------*/
+.char-head {
+  position: relative; isolation: isolate; overflow: hidden;
+  min-height: 225px; margin-bottom: 20px; padding: 14px 28px 18px; /* ~25% shorter than first cut */
+  border-radius: var(--radius); color: #fff;
+  display: flex; flex-direction: column;
+  background-size: cover; background-position: 50% 55%; /* eye line of the art */
+  text-shadow: 0 2px 14px rgba(0, 0, 0, 0.55); /* keeps white text readable over busy art */
+}
+.char-head::before { content: ""; position: absolute; inset: 0; z-index: -1; }
+.char-head.has-art::before { /* darken the left (text side) + bottom, let the art show on the right */
+  background:
+    linear-gradient(90deg, rgba(0, 0, 0, 0.6) 0%, rgba(0, 0, 0, 0.25) 40%, transparent 65%),
+    linear-gradient(0deg, rgba(0, 0, 0, 0.45) 0%, transparent 40%);
+}
+.char-head.no-art { /* placeholder: the character's own ramp, accent glow top right */
+  background:
+    radial-gradient(circle at 82% 30%, color-mix(in srgb, var(--accent) 30%, transparent) 0%, transparent 55%),
+    repeating-linear-gradient(135deg, rgba(255, 255, 255, 0.025) 0 2px, transparent 2px 14px),
+    linear-gradient(120deg, var(--c3) 0%, var(--c2) 45%, var(--c1) 100%);
+}
+.char-head-top { display: flex; justify-content: space-between; align-items: center; gap: 12px; }
+.char-head-back { color: #fff; opacity: 0.85; font-size: 0.78rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; }
+.char-head-back:hover { opacity: 1; }
+.char-head .pill { background: rgba(0, 0, 0, 0.35); color: #fff; border-color: rgba(255, 255, 255, 0.25); text-shadow: none; }
+.char-head-name { display: flex; align-items: flex-end; flex-wrap: wrap; gap: 6px 20px; margin-top: auto; padding-top: 12px; } /* pushed down onto the campaign line */
+.char-head h1 {
+  font-family: var(--font-poster), var(--font-sans); font-weight: 400;
+  font-size: clamp(4.5rem, 14vw, 9rem); line-height: 0.8; letter-spacing: 0.01em; margin: 0; color: #fff;
+}
+.char-head-side { padding-bottom: 0; } /* bottom of the side block lines up with the name, right above the campaign line */
+.char-head-last { font-style: italic; font-weight: 800; font-size: clamp(1.6rem, 4.4vw, 3rem); line-height: 1; text-transform: uppercase; letter-spacing: 0.02em; }
+.char-head-class { margin-top: 8px; font-weight: 700; font-size: 1.15rem; letter-spacing: 0.1em; text-transform: uppercase; opacity: 0.92; }
+.char-head-meta { display: flex; flex-wrap: wrap; row-gap: 4px; margin-top: 12px; font-size: 0.8rem; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; }
+.char-head-meta span + span { border-left: 1px solid rgba(255, 255, 255, 0.6); margin-left: 12px; padding-left: 12px; }
+@media (max-width: 520px) {
+  .char-head { min-height: 200px; padding: 12px 16px 14px; background-position: 70% 40%; }
+  .char-head-side { padding-bottom: 0; }
+  .char-head-meta span + span { border-left: 0; margin-left: 0; padding-left: 0; } /* stacked on phones */
+  .char-head-meta { flex-direction: column; }
+}
+
+/* character pages: no fixed top glow (shows as a band mid-page once scrolled) */
+body:has(.char-head)::before { display: none; }
+
+/* totals as one joined strip: 1px gaps show the grid colour as dividers */
+.stats-strip { margin-top: 20px; gap: 1px; background: var(--grid); border: 1px solid var(--grid); border-radius: var(--radius); overflow: hidden; }
+.stats-strip > .card { border: 0; border-radius: 0; box-shadow: none; margin: 0; }
+@media (max-width: 1000px) and (min-width: 521px) { .stats-strip > :last-child:nth-child(7) { grid-column: span 2; } } /* 7 tiles in 4 columns -> no empty cell */
+
+/* spells cast: total box left of the level bar */
+.spell-top { display: flex; gap: 12px; align-items: stretch; }
+.spell-total {
+  min-width: 78px; padding: 6px 12px; border: 1px solid var(--grid); border-radius: var(--radius-sm);
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+}
+.spell-total strong { font-family: var(--font-display); font-size: 1.6rem; line-height: 1.1; color: var(--metric); }
+.spell-total span { font-size: 0.75rem; color: var(--ink-muted); }
+.spell-bar { flex: 1; min-width: 0; display: flex; flex-direction: column; justify-content: center; }
