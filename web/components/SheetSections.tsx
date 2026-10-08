@@ -24,12 +24,28 @@ import { motion } from "motion/react"; //bar grow-in
 import { useEffect, useRef, useState } from "react";
 import type { CharacterSheet, SheetAbility, SheetNight, SheetSpell } from "@/lib/data";
 import { FAIR_D20, StatTile } from "./ui";
+import { luminance } from "@/lib/themes";
 
 const EASE = [0.22, 1, 0.36, 1] as const; //same ease-out as the rest of the site
 const MIN_ROLLS = 5; //fewer rolls -> luck is noise, drawn faded
 
-//categorical colours from the character theme: accent first, then ramp steps (palette stays in-family)
-const SERIES = ["var(--accent)", "var(--c5)", "var(--accent-deep)", "var(--c4)", "var(--c3)", "var(--ink-muted)"];
+//damage type -> its own colour (breaks from the character theme on purpose; every bar is labelled by name)
+const DAMAGE_COLORS: Record<string, string> = {
+  Acid:        "#a3e635", //lime
+  Bludgeoning: "#a68a6d", //brown
+  Cold:        "#a6ecff", //ice
+  Fire:        "#f5973a", //orange
+  Force:       "#9b7bff", //arcane violet
+  Lightning:   "#7fb2ff", //electric blue
+  Necrotic:    "#4a8f86", //murky teal-green
+  Piercing:    "#c4ccd6", //steel
+  Poison:      "#4f9e3f", //green
+  Psychic:     "#f28ad1", //pink
+  Radiant:     "#f6d76b", //gold
+  Slashing:    "#c43a52", //crimson
+  Thunder:     "#6c7bd9", //indigo
+};
+const UNTYPED_COLOR = "#8a8a8a"; //Untyped + anything not in the map
 
 //--------------------------------------------------------------------------------------------------------------
 //Shared
@@ -231,13 +247,14 @@ export function AttackSplit({ attacks, total, hits }: { attacks: CharacterSheet[
   );
 }
 
-// damage per type, coloured by rank; spell / weapon tag after each type
+// damage per type, each type in its own colour; spell / weapon tag after each type
 //params: types (CharacterSheet["damageTypes"]) - sorted by damage desc
 //output: JSX.Element
 export function DamageByType({ types }: { types: CharacterSheet["damageTypes"] }) {
   const total = types.reduce((a, t) => a + t.damage, 0);
   const rolls = types.reduce((a, t) => a + t.rolls, 0);
-  const color = (i: number) => SERIES[Math.min(i, SERIES.length - 1)]; //rank -> palette step; tail shares the last
+  const color = (type: string) => DAMAGE_COLORS[type] ?? UNTYPED_COLOR;
+  const ink = (type: string) => (luminance(color(type)) > 0.25 ? "#16161a" : "#fff"); //dark text on light colours
   return (
     <div className="card">
       <div className="section-head">
@@ -248,14 +265,14 @@ export function DamageByType({ types }: { types: CharacterSheet["damageTypes"] }
       </div>
       {total ? (
         <>
-          <SplitBar parts={types.map((t, i) => ({ value: t.damage, color: color(i), label: pct(t.damage, total, 0), ink: i === 0 || i === 2 ? "var(--on-accent)" : "var(--c1)" }))} />
-          {types.map((t, i) => (
+          <SplitBar parts={types.map((t) => ({ value: t.damage, color: color(t.type), label: pct(t.damage, total, 0), ink: ink(t.type) }))} />
+          {types.map((t) => (
             <BarRow
               key={`${t.type}-${t.source}`}
               label={<>{t.type} <small>{t.source}</small></>}
               value={t.damage}
               max={types[0].damage}
-              color={color(i)}
+              color={color(t.type)}
               right={`${fmt(t.damage)} · ${pct(t.damage, total, 0)}`}
             />
           ))}
