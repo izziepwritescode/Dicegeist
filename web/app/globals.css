@@ -147,10 +147,14 @@ Shared pieces
 @keyframes ping { 0% { transform: scale(1); opacity: 0.7; } 100% { transform: scale(3); opacity: 0; } }
 
 .stats-row { display: grid; gap: 12px; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); margin-bottom: 20px; }
-.stats-row-8 { grid-template-columns: repeat(8, minmax(0, 1fr)); gap: 10px; }
-.stats-row-8 .card { padding: 14px 12px; }
+.stats-row-8 { grid-template-columns: repeat(var(--tiles, 8), minmax(0, 1fr)); gap: 10px; } /* 7 for roll20 (no healing) */
+.stats-row-8 .card { padding: 14px 8px; text-align: center; }
+.stats-row-8 .eyebrow { white-space: nowrap; letter-spacing: 0.04em; } /* one-line titles */
 @media (max-width: 1000px) { .stats-row-8 { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
-@media (max-width: 520px) { .stats-row-8 { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 520px) {
+  .stats-row-8 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .stats-row-8 > :last-child:nth-child(odd) { grid-column: span 2; } /* odd count -> last tile full width, no orphan */
+}
 .stats-row-8 .stat-value { font-size: 1.6rem; }
 .stat-value { font-size: 2rem; font-weight: 700; line-height: 1.1; margin-top: 4px; color: var(--metric); }
 .stat-sub { font-size: 0.8rem; color: var(--ink-2); margin-top: 4px; }

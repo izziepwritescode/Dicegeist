@@ -97,24 +97,23 @@ function Legend({ items }: { items: [string, string][] }) {
 //Sections
 //--------------------------------------------------------------------------------------------------------------
 
-// headline tiles: rolls, nat 20 / 1, attacks, damage, spells, healing, avg d20
+// headline tiles: rolls, nat 20 / 1, attacks, damage, spells, healing (foundry only), avg d20
 //params: sheet (CharacterSheet)
 //output: JSX.Element
 export function SheetKpis({ sheet }: { sheet: CharacterSheet }) {
   const k = sheet.kpis;
   return (
-    <div className="stats-row stats-row-8">
+    <div className="stats-row stats-row-8" style={{ "--tiles": k.healHP === null ? 7 : 8 } as React.CSSProperties}>
       <StatTile label="Total rolls" value={k.rolls} sub={`${fmt(k.d20s)} with a d20`} />
-      <StatTile label="Nat 20s" value={k.nat20s} sub={`${pct(k.nat20s, k.d20s)} of d20s (fair 5%)`} />
-      <StatTile label="Nat 1s" value={k.nat1s} sub={`${pct(k.nat1s, k.d20s)} of d20s (fair 5%)`} />
+      <StatTile label="Nat 20s" value={k.nat20s} sub={`${pct(k.nat20s, k.d20s)} (fair 5%)`} />
+      <StatTile label="Nat 1s" value={k.nat1s} sub={`${pct(k.nat1s, k.d20s)} (fair 5%)`} />
       <StatTile label="Attacks" value={k.attacks} sub={`${pct(k.hits, k.attacks, 0)} hit`} />
       <StatTile label="Total damage" value={k.damage} sub={`${pct(k.spellDamage, k.damage, 0)} from spells`} />
       <StatTile label="Spells cast" value={k.spellsCast} />
-      <StatTile
-        label="Healing (HP)"
-        value={k.healHP} //null on roll20 -> dash
-        sub={k.healHP === null ? "Roll20 excluded" : `${k.heals} heals${k.tempHP ? ` · +${fmt(k.tempHP)} temp HP` : ""}`}
-      />
+      {k.healHP !== null && (
+        //roll20 healing logs are incomplete -> tile left off entirely for roll20 characters
+        <StatTile label="Healing (HP)" value={k.healHP} sub={<>{k.heals} heals{k.tempHP ? <><br />+{fmt(k.tempHP)} temp HP</> : null}</>} />
+      )}
       <StatTile label="Avg d20" value={k.avgD20} decimals={2} sub={k.expectedD20 === null ? undefined : `expected ${k.expectedD20.toFixed(2)}`} />
     </div>
   );
