@@ -22,8 +22,12 @@ import { LiveBadge } from "./ui";
 //--------------------------------------------------------------------------------------------------------------
 
 //keyed by lowercase first name (same key as the palettes); files live in web/public/art
+//standard size: 2134 x 656 px (Izzie's 4267 x 1312 drafts at half size), art on the right, plain left for the text
 const ART: Record<string, string> = {
   lazlo: "/art/lazlo.jpg",
+  vasha: "/art/vasha.jpg",
+  idris: "/art/idris.jpg",
+  ivan: "/art/ivan.jpg",
 };
 
 //--------------------------------------------------------------------------------------------------------------

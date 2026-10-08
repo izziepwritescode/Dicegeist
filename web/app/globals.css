@@ -361,18 +361,14 @@ Character sheet sections (components/SheetSections.tsx); colours all come from t
 --------------------------------------------------------------------------------------------------------------*/
 .char-head {
   position: relative; isolation: isolate; overflow: hidden;
-  min-height: 225px; margin-bottom: 20px; padding: 14px 28px 18px; /* ~25% shorter than first cut */
+  aspect-ratio: 2134 / 656; /* same shape as the splash art, so nothing is cropped */
+  min-height: 225px; margin-bottom: 20px; padding: 14px 28px 18px;
   border-radius: var(--radius); color: #fff;
   display: flex; flex-direction: column;
-  background-size: cover; background-position: 50% 55%; /* eye line of the art */
-  text-shadow: 0 2px 14px rgba(0, 0, 0, 0.55); /* keeps white text readable over busy art */
+  background-color: var(--c1); background-size: cover; background-position: right center;
+  text-shadow: 0 2px 12px rgba(0, 0, 0, 0.45); /* art leaves the left side plain; shadow is a safety net */
 }
 .char-head::before { content: ""; position: absolute; inset: 0; z-index: -1; }
-.char-head.has-art::before { /* darken the left (text side) + bottom, let the art show on the right */
-  background:
-    linear-gradient(90deg, rgba(0, 0, 0, 0.6) 0%, rgba(0, 0, 0, 0.25) 40%, transparent 65%),
-    linear-gradient(0deg, rgba(0, 0, 0, 0.45) 0%, transparent 40%);
-}
 .char-head.no-art { /* placeholder: the character's own ramp, accent glow top right */
   background:
     radial-gradient(circle at 82% 30%, color-mix(in srgb, var(--accent) 30%, transparent) 0%, transparent 55%),
@@ -380,22 +376,25 @@ Character sheet sections (components/SheetSections.tsx); colours all come from t
     linear-gradient(120deg, var(--c3) 0%, var(--c2) 45%, var(--c1) 100%);
 }
 .char-head-top { display: flex; justify-content: space-between; align-items: center; gap: 12px; }
-.char-head-back { color: #fff; opacity: 0.85; font-size: 0.78rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; }
+.char-head-back { color: #fff; opacity: 0.85; font-size: 0.78rem; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; }
 .char-head-back:hover { opacity: 1; }
 .char-head .pill { background: rgba(0, 0, 0, 0.35); color: #fff; border-color: rgba(255, 255, 255, 0.25); text-shadow: none; }
-.char-head-name { display: flex; align-items: flex-end; flex-wrap: wrap; gap: 6px 20px; margin-top: auto; padding-top: 12px; } /* pushed down onto the campaign line */
+/* mockup layout: huge first name, surname + class beside its lower half, campaign line along the bottom */
+.char-head-name { display: flex; align-items: flex-end; flex-wrap: wrap; gap: 6px 22px; margin-top: auto; padding-top: 8px; }
 .char-head h1 {
   font-family: var(--font-poster), var(--font-sans); font-weight: 400;
-  font-size: clamp(4.5rem, 14vw, 9rem); line-height: 0.8; letter-spacing: 0.01em; margin: 0; color: #fff;
+  font-size: clamp(4.5rem, 12.5vw, 10.5rem); line-height: 0.8; letter-spacing: 0.01em; margin: 0; color: #fff;
 }
-.char-head-side { padding-bottom: 0; } /* bottom of the side block lines up with the name, right above the campaign line */
-.char-head-last { font-style: italic; font-weight: 800; font-size: clamp(1.6rem, 4.4vw, 3rem); line-height: 1; text-transform: uppercase; letter-spacing: 0.02em; }
-.char-head-class { margin-top: 8px; font-weight: 700; font-size: 1.15rem; letter-spacing: 0.1em; text-transform: uppercase; opacity: 0.92; }
-.char-head-meta { display: flex; flex-wrap: wrap; row-gap: 4px; margin-top: 12px; font-size: 0.8rem; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; }
-.char-head-meta span + span { border-left: 1px solid rgba(255, 255, 255, 0.6); margin-left: 12px; padding-left: 12px; }
+.char-head-side { padding-bottom: 0.2rem; }
+.char-head-last { font-weight: 600; font-size: clamp(1.6rem, 3.6vw, 2.6rem); line-height: 1; letter-spacing: 0.01em; color: #ece6ea; } /* title case, as in the mockup */
+.char-head-class { margin-top: 6px; font-style: italic; font-weight: 800; font-size: clamp(1rem, 2vw, 1.4rem); letter-spacing: 0.06em; text-transform: uppercase; }
+.char-head-meta { display: flex; flex-wrap: wrap; row-gap: 4px; margin-top: 14px; font-size: 0.85rem; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; }
+.char-head-meta span + span { border-left: 1px solid rgba(255, 255, 255, 0.7); margin-left: 12px; padding-left: 12px; }
+@media (max-width: 700px) {
+  .char-head { aspect-ratio: auto; min-height: 210px; padding: 12px 16px 14px; background-position: 85% center; }
+  .char-head::before { background: linear-gradient(90deg, rgba(0, 0, 0, 0.55), transparent 80%); } /* narrow: art sits behind the text */
+}
 @media (max-width: 520px) {
-  .char-head { min-height: 200px; padding: 12px 16px 14px; background-position: 70% 40%; }
-  .char-head-side { padding-bottom: 0; }
   .char-head-meta span + span { border-left: 0; margin-left: 0; padding-left: 0; } /* stacked on phones */
   .char-head-meta { flex-direction: column; }
 }
