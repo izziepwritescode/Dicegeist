@@ -15,7 +15,7 @@
 //     SpellsCast
 //     NightsChart
 //   Helpers
-//     pct / fmt / levelLabel / levelColor
+//     pct / fmt / modText / levelLabel / levelColor
 //--------------------------------------------------------------------------------------------------------------
 
 "use client";
@@ -23,9 +23,10 @@
 import { motion } from "motion/react"; //bar grow-in
 import { useEffect, useRef, useState } from "react";
 import type { CharacterSheet, SheetAbility, SheetNight, SheetSpell } from "@/lib/data";
-import { StatTile } from "./ui";
+import { FAIR_D20, StatTile } from "./ui";
 
 const EASE = [0.22, 1, 0.36, 1] as const; //same ease-out as the rest of the site
+const MIN_ROLLS = 5; //fewer rolls -> luck is noise, drawn faded
 
 //categorical colours from the character theme: accent first, then ramp steps (palette stays in-family)
 const SERIES = ["var(--accent)", "var(--c5)", "var(--accent-deep)", "var(--c4)", "var(--c3)", "var(--ink-muted)"];
@@ -119,47 +120,68 @@ export function SheetKpis({ sheet }: { sheet: CharacterSheet }) {
   );
 }
 
-// six ability blocks: score + mod, then avg / highest total and d20 from checks, skills, initiative
+// stat-block row: big score + modifier pill, small luck gauge (tick = fair 10.5) under each
 //params: abilities (SheetAbility[]) - STR..CHA order
 //output: JSX.Element
 export function AbilitiesArray({ abilities }: { abilities: SheetAbility[] }) {
   const rolls = abilities.reduce((a, x) => a + x.rolls, 0);
+  const pos = (v: number) => Math.min(100, Math.max(0, ((v - 8.5) / 4) * 100)); //zoomed 8.5..12.5, same range as the home luck meter
   return (
     <div className="card">
       <div className="section-head">
         <div>
-          <h2>Abilities array</h2>
-          <p>Ability score, then the average and highest of {fmt(rolls)} ability checks, skills and initiative (initiative counts as DEX).</p>
+          <h2>Abilities</h2>
+          <p>
+            Score and modifier, then how the d20 has treated each ability: the average natural roll (before modifiers) next to
+            10.5, what a fair d20 averages. &ldquo;1.2 above fair&rdquo; means the die has landed 1.2 higher than a fair one would,
+            per roll on average. From {fmt(rolls)} ability checks, skills and initiative (initiative counts as DEX); saving
+            throws are left out.
+          </p>
         </div>
       </div>
       <div className="abil-grid">
         {abilities.map((a) => {
-          const mod = a.score === null ? null : Math.floor((a.score - 10) / 2); //5e modifier: (score - 10) / 2 rounded down
+          const d = (a.avgD20 ?? FAIR_D20) - FAIR_D20;
+          const thin = a.rolls < MIN_ROLLS; //too few rolls to read luck from
           return (
-            <div key={a.code} className="abil">
+            <div key={a.code} className="abil" title={`avg d20 ${a.avgD20 ?? "–"} · avg total ${a.avgTotal ?? "–"}`}>
               <div className="abil-code">{a.code}</div>
               <div className="abil-score">{a.score ?? "–"}</div>
-              <div className="abil-note">
-                {mod === null ? "score not entered" : `${mod >= 0 ? "+" : ""}${mod} mod`} · {a.rolls} rolls
-              </div>
-              {a.rolls ? (
-                <>
-                  <div className="abil-stats">
-                    <div><b>{a.avgTotal?.toFixed(1)}</b><span>avg total</span></div>
-                    <div><b>{a.maxTotal}</b><span>highest</span></div>
+              <div className="abil-mod">{modText(a.score)}</div>
+              {/* only the luck part fades on thin samples; score + modifier always stay solid */}
+              <div style={{ opacity: thin ? 0.45 : 1 }}>
+                <div className="abil-gauge">
+                  <i className="abil-fair" />
+                  {a.rolls > 0 && (
+                    <motion.i
+                      className="abil-fill"
+                      initial={{ scaleX: 0 }}
+                      whileInView={{ scaleX: 1 }}
+                      viewport={{ once: true }}
+                      transition={{ duration: 0.7, ease: EASE }}
+                      style={{
+                        left: `${Math.min(pos(a.avgD20!), 50)}%`,
+                        width: `${Math.abs(pos(a.avgD20!) - 50)}%`,
+                        background: d >= 0 ? "var(--accent)" : "var(--c4)",
+                        transformOrigin: d >= 0 ? "left" : "right", //grows out from the fair tick
+                      }}
+                    />
+                  )}
+                </div>
+                <div className="abil-luck">{a.rolls ? <>avg roll <b>{a.avgD20!.toFixed(1)}</b></> : "no rolls"}</div>
+                {a.rolls > 0 && (
+                  //points on the d20, not a percent: avg natural roll minus 10.5
+                  <div className="abil-vs" style={{ color: d >= 0 && !thin ? "var(--accent)" : "var(--ink-2)" }}>
+                    {Math.abs(d) < 0.05 ? "right on fair" : `${Math.abs(d).toFixed(1)} ${d > 0 ? "above" : "below"} fair`}
                   </div>
-                  <div className="abil-note">d20 avg {a.avgD20?.toFixed(1)} · high {a.maxD20}</div>
-                </>
-              ) : (
-                <div className="abil-note">no rolls</div>
-              )}
+                )}
+              </div>
+              <div className="abil-sub">{a.rolls} roll{a.rolls === 1 ? "" : "s"} · best {a.maxTotal ?? "–"}</div>
             </div>
           );
         })}
       </div>
-      <p className="card-foot">
-        Totals include modifiers. The d20 figures are the natural roll, using the kept die on advantage and disadvantage. Saving throws are left out.
-      </p>
+      <p className="card-foot">Faded luck: under {MIN_ROLLS} rolls, too few to call lucky or unlucky. Best = highest total, modifiers included.</p>
     </div>
   );
 }
@@ -459,6 +481,15 @@ function pct(a: number, b: number, d = 1): string {
 //output: string
 function fmt(n: number): string {
   return n.toLocaleString("en-US");
+}
+
+// ability score -> "+2" modifier text; 5e modifier = (score - 10) / 2 rounded down
+//params: score (number | null)
+//output: string
+function modText(score: number | null): string {
+  if (score === null) return "no score";
+  const m = Math.floor((score - 10) / 2);
+  return `${m >= 0 ? "+" : ""}${m}`;
 }
 
 // spell level range as text: 0 -> Cantrip, 1..4 -> "1–4", unknown -> "?"
