@@ -347,3 +347,52 @@ Character sheet sections (components/SheetSections.tsx); colours all come from t
 .night { background: var(--page); border-radius: var(--radius-sm); padding: 10px 12px; }
 .night-k { color: var(--ink-2); font-size: 0.75rem; }
 .night-d { font-weight: 700; font-size: 1.05rem; font-variant-numeric: tabular-nums; }
+
+/*--------------------------------------------------------------------------------------------------------------
+Ability display options (components/AbilityOptions.tsx, demo page only until one is picked)
+--------------------------------------------------------------------------------------------------------------*/
+
+.opt-title { font-size: 1.15rem; margin-bottom: 4px; }
+.opt-pitch { color: var(--ink-2); font-size: 0.85rem; margin-bottom: 10px; }
+
+/* A + B shared: ability id column, number column */
+.opt-a, .opt-b { display: grid; gap: 10px; }
+.opt-a-row, .opt-b-row { display: grid; grid-template-columns: 90px 1fr 170px; gap: 14px; align-items: center; }
+.opt-a-id b { display: block; color: var(--accent); font-size: 0.9rem; letter-spacing: 0.06em; }
+.opt-a-id span, .opt-a-num span { display: block; color: var(--ink-2); font-size: 0.72rem; }
+.opt-a-num { text-align: right; }
+.opt-a-num b { font-size: 1.1rem; color: var(--metric); font-variant-numeric: tabular-nums; }
+.opt-a-track, .opt-b-track { position: relative; height: 22px; }
+.opt-a-mid { position: absolute; left: 50%; top: -4px; bottom: -4px; width: 1px; background: var(--ink-muted); }
+.opt-a-bar { position: absolute; top: 3px; bottom: 3px; }
+
+.opt-b-track::before { content: ""; position: absolute; left: 0; right: 0; top: 50%; height: 2px; transform: translateY(-50%); background: var(--page); border-radius: 2px; }
+.opt-b-range { position: absolute; top: 50%; height: 2px; transform: translateY(-50%); background: var(--c4); border-radius: 2px; }
+.opt-b-fair { position: absolute; top: 2px; bottom: 2px; width: 2px; margin-left: -1px; background: var(--ink-muted); }
+.opt-b-dot { position: absolute; top: 50%; width: 14px; height: 14px; margin: -7px 0 0 -7px; border-radius: 50%; box-shadow: 0 0 0 2px var(--surface); }
+.opt-b-axis { display: grid; grid-template-columns: 1fr 1fr 1fr; margin: 0 184px 0 104px; font-size: 0.7rem; color: var(--ink-muted); }
+.opt-b-axis span:nth-child(2) { text-align: center; } .opt-b-axis span:nth-child(3) { text-align: right; }
+
+/* C: stat block */
+.opt-c { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 10px; }
+.opt-c-cell { background: var(--page); border-radius: var(--radius-sm); padding: 14px 10px 12px; text-align: center; }
+.opt-c-code { font-size: 0.75rem; letter-spacing: 0.1em; color: var(--ink-2); font-weight: 700; }
+.opt-c-score { font-family: var(--font-display); font-size: 2.2rem; line-height: 1.1; }
+.opt-c-mod { display: inline-block; margin: 2px 0 10px; padding: 1px 10px; border-radius: 999px; background: var(--surface-2); font-size: 0.8rem; font-weight: 700; }
+.opt-c-gauge { position: relative; height: 6px; border-radius: 999px; background: var(--surface-2); }
+.opt-c-fair { position: absolute; left: 50%; top: -3px; bottom: -3px; width: 1px; background: var(--ink-muted); }
+.opt-c-fill { position: absolute; top: 0; bottom: 0; border-radius: 999px; }
+.opt-c-luck { font-size: 0.85rem; font-weight: 700; margin-top: 8px; font-variant-numeric: tabular-nums; }
+.opt-c-sub { font-size: 0.7rem; color: var(--ink-muted); }
+@media (max-width: 700px) { .opt-c { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+
+/* D: hexagon */
+.opt-d { display: flex; flex-direction: column; align-items: center; }
+.opt-d-svg { width: 100%; max-width: 360px; height: auto; overflow: visible; }
+.opt-d-code { fill: var(--accent); font-size: 12px; font-weight: 700; letter-spacing: 0.06em; }
+.opt-d-val { fill: var(--ink-2); font-size: 11px; font-variant-numeric: tabular-nums; }
+
+@media (max-width: 560px) {
+  .opt-a-row, .opt-b-row { grid-template-columns: 56px 1fr 92px; gap: 8px; }
+  .opt-b-axis { margin: 0 100px 0 64px; }
+}
