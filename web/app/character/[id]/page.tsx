@@ -84,7 +84,7 @@ export default function CharacterPage() {
                   <SpellVsWeapon total={data.sheet.kpis.damage} spell={data.sheet.kpis.spellDamage} damage={data.sheet.damage} />
                 </div>
                 <div className="span-12">
-                  <SpellsCast levels={data.sheet.spellLevels} spells={data.sheet.spells} total={data.sheet.kpis.spellsCast} />
+                  <SpellsCast levels={data.sheet.spellLevels} spells={data.sheet.spells} total={data.sheet.kpis.spellsCast} byLevel={data.sheet.kpis.platform === "roll20"} />
                 </div>
               </motion.div>
             </>

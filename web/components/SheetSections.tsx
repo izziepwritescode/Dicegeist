@@ -345,13 +345,14 @@ export function SpellVsWeapon({ total, spell, damage }: { total: number; spell: 
   );
 }
 
-// casts by spell level, then a per-spell table
-//params: levels (CharacterSheet["spellLevels"]); spells (SheetSpell[]); total (number) - all casts
+// casts by spell level, then a per-spell table (or a per-level table for Roll20)
+//params: byLevel (boolean) - true = casts per level table instead of per spell (Roll20 characters); levels (CharacterSheet["spellLevels"]); spells (SheetSpell[]); total (number) - all casts
 //output: JSX.Element
-export function SpellsCast({ levels, spells, total }: { levels: CharacterSheet["spellLevels"]; spells: SheetSpell[]; total: number }) {
+export function SpellsCast({ levels, spells, total, byLevel = false }: { levels: CharacterSheet["spellLevels"]; spells: SheetSpell[]; total: number; byLevel?: boolean }) {
   const known = levels.filter((l) => l.level !== null); //unknown level left off the bar, still in the total
   const n = known.reduce((a, l) => a + l.casts, 0);
   const top = Math.max(1, ...known.map((l) => l.level!));
+  const all = levels.reduce((a, l) => a + l.casts, 0); //per-level table share, unknown level included
   return (
     <div className="card">
       <div className="section-head">
@@ -372,6 +373,22 @@ export function SpellsCast({ levels, spells, total }: { levels: CharacterSheet["
           />
           <Legend items={known.map((l) => [`${l.level ? `Level ${l.level}` : "Cantrip"}: ${l.casts} (${pct(l.casts, n)})`, levelColor(l.level!, top)])} />
           <div className="table-scroll" style={{ marginTop: 12 }}>
+            {byLevel ? (
+            <table className="data-table">
+              <thead>
+                <tr><th>Level</th><th>Casts</th><th>Share</th></tr>
+              </thead>
+              <tbody>
+                {levels.map((l) => (
+                  <tr key={l.level ?? "unknown"}>
+                    <td>{l.level === null ? "Unknown level" : l.level ? `Level ${l.level}` : "Cantrip"}</td>
+                    <td>{fmt(l.casts)}</td>
+                    <td>{pct(l.casts, all)}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+            ) : (
             <table className="data-table">
               <thead>
                 <tr><th>Spell</th><th>Level</th><th>Casts</th><th>Damage</th><th>Healing</th></tr>
@@ -388,6 +405,7 @@ export function SpellsCast({ levels, spells, total }: { levels: CharacterSheet["
                 ))}
               </tbody>
             </table>
+            )}
           </div>
         </>
       ) : (
