@@ -355,3 +355,62 @@ Character sheet sections (components/SheetSections.tsx); colours all come from t
 .night { background: var(--page); border-radius: var(--radius-sm); padding: 10px 12px; }
 .night-k { color: var(--ink-2); font-size: 0.75rem; }
 .night-d { font-weight: 700; font-size: 1.05rem; font-variant-numeric: tabular-nums; }
+
+/*--------------------------------------------------------------------------------------------------------------
+  Character header: splash art band, white text (art from web/public/art; tinted placeholder otherwise)
+--------------------------------------------------------------------------------------------------------------*/
+.char-head {
+  position: relative; isolation: isolate; overflow: hidden;
+  min-height: 300px; margin-bottom: 20px; padding: 18px 28px 22px;
+  border-radius: var(--radius); color: #fff;
+  display: flex; flex-direction: column; justify-content: space-between;
+  background-size: cover; background-position: 50% 55%; /* eye line of the art */
+  text-shadow: 0 2px 14px rgba(0, 0, 0, 0.55); /* keeps white text readable over busy art */
+}
+.char-head::before { content: ""; position: absolute; inset: 0; z-index: -1; }
+.char-head.has-art::before { /* darken the left (text side) + bottom, let the art show on the right */
+  background:
+    linear-gradient(90deg, rgba(0, 0, 0, 0.6) 0%, rgba(0, 0, 0, 0.25) 40%, transparent 65%),
+    linear-gradient(0deg, rgba(0, 0, 0, 0.45) 0%, transparent 40%);
+}
+.char-head.no-art { /* placeholder: the character's own ramp, accent glow top right */
+  background:
+    radial-gradient(circle at 82% 30%, color-mix(in srgb, var(--accent) 30%, transparent) 0%, transparent 55%),
+    repeating-linear-gradient(135deg, rgba(255, 255, 255, 0.025) 0 2px, transparent 2px 14px),
+    linear-gradient(120deg, var(--c3) 0%, var(--c2) 45%, var(--c1) 100%);
+}
+.char-head-top { display: flex; justify-content: space-between; align-items: center; gap: 12px; }
+.char-head-back { color: #fff; opacity: 0.85; font-size: 0.78rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; }
+.char-head-back:hover { opacity: 1; }
+.char-head .pill { background: rgba(0, 0, 0, 0.35); color: #fff; border-color: rgba(255, 255, 255, 0.25); text-shadow: none; }
+.char-head-name { display: flex; align-items: flex-end; flex-wrap: wrap; gap: 6px 20px; margin-top: 22px; }
+.char-head h1 {
+  font-family: var(--font-poster), var(--font-sans); font-weight: 400;
+  font-size: clamp(4.5rem, 14vw, 9.5rem); line-height: 0.8; letter-spacing: 0.01em; margin: 0; color: #fff;
+}
+.char-head-side { padding-bottom: 0.7rem; }
+.char-head-last { font-weight: 800; font-size: clamp(1.25rem, 3.2vw, 2.1rem); line-height: 1; text-transform: uppercase; letter-spacing: 0.02em; }
+.char-head-class { margin-top: 8px; font-weight: 700; font-size: 0.95rem; letter-spacing: 0.1em; text-transform: uppercase; opacity: 0.92; }
+.char-head-meta { display: flex; flex-wrap: wrap; row-gap: 4px; margin-top: 16px; font-size: 0.8rem; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; }
+.char-head-meta span + span { border-left: 1px solid rgba(255, 255, 255, 0.6); margin-left: 12px; padding-left: 12px; }
+@media (max-width: 520px) {
+  .char-head { min-height: 250px; padding: 14px 16px 16px; background-position: 70% 40%; }
+  .char-head-side { padding-bottom: 0; }
+  .char-head-meta span + span { border-left: 0; margin-left: 0; padding-left: 0; } /* stacked on phones */
+  .char-head-meta { flex-direction: column; }
+}
+
+/* totals as one joined strip: 1px gaps show the grid colour as dividers */
+.stats-strip { gap: 1px; background: var(--grid); border: 1px solid var(--grid); border-radius: var(--radius); overflow: hidden; }
+.stats-strip > .card { border: 0; border-radius: 0; box-shadow: none; margin: 0; }
+@media (max-width: 1000px) and (min-width: 521px) { .stats-strip > :last-child:nth-child(7) { grid-column: span 2; } } /* 7 tiles in 4 columns -> no empty cell */
+
+/* spells cast: total box left of the level bar */
+.spell-top { display: flex; gap: 12px; align-items: stretch; }
+.spell-total {
+  min-width: 78px; padding: 6px 12px; border: 1px solid var(--grid); border-radius: var(--radius-sm);
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+}
+.spell-total strong { font-family: var(--font-display); font-size: 1.6rem; line-height: 1.1; color: var(--metric); }
+.spell-total span { font-size: 0.75rem; color: var(--ink-muted); }
+.spell-bar { flex: 1; min-width: 0; display: flex; flex-direction: column; justify-content: center; }

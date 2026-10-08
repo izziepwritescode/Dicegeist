@@ -119,7 +119,7 @@ function Legend({ items }: { items: [string, string][] }) {
 export function SheetKpis({ sheet }: { sheet: CharacterSheet }) {
   const k = sheet.kpis;
   return (
-    <div className="stats-row stats-row-8" style={{ "--tiles": k.healHP === null ? 7 : 8 } as React.CSSProperties}>
+    <div className="stats-row stats-row-8 stats-strip" style={{ "--tiles": k.healHP === null ? 7 : 8 } as React.CSSProperties}>
       <StatTile label="Total rolls" value={k.rolls} sub={`${fmt(k.d20s)} with a d20`} />
       <StatTile label="Nat 20s" value={k.nat20s} sub={`${pct(k.nat20s, k.d20s)} (fair 5%)`} />
       <StatTile label="Nat 1s" value={k.nat1s} sub={`${pct(k.nat1s, k.d20s)} (fair 5%)`} />
@@ -241,12 +241,12 @@ export function AttackSplit({ attacks, total, hits }: { attacks: CharacterSheet[
           ))}
           {attacks.streaks && (
             <div className="nights">
-              {([["hit", "Longest hit streak", "var(--good)"], ["miss", "Longest miss streak", "var(--critical)"]] as const).map(([k, title, c]) => {
+              {([["hit", "Best streak", "var(--good)"], ["miss", "Worst streak", "var(--critical)"]] as const).map(([k, title, c]) => {
                 const st = attacks.streaks?.[k];
                 return st ? (
                   <div className="night" key={k}>
                     <div className="night-k">{title}</div>
-                    <div className="night-d" style={{ color: c }}>{st.length} in a row</div>
+                    <div className="night-d" style={{ color: c }}>{st.length} {k === "hit" ? "hits" : "misses"} in a row</div>
                     <div className="night-k">{st.from === st.to ? st.from : `${st.from} to ${st.to}`}</div>
                   </div>
                 ) : null;
@@ -358,19 +358,27 @@ export function SpellsCast({ levels, spells, total, byLevel = false }: { levels:
       <div className="section-head">
         <div>
           <h2>Spells cast</h2>
-          <p>{fmt(total)} casts. Each spell attack roll counts as a cast (every beam or ray); other spells count once per damage or healing roll</p>
+          <p>Each spell attack roll counts as a cast (every beam or ray); other spells count once per damage or healing roll</p>
         </div>
       </div>
       {total ? (
         <>
-          <SplitBar
-            parts={known.map((l) => ({
-              value: l.casts,
-              color: levelColor(l.level!, top),
-              label: `${l.level ? `L${l.level}` : "Cantrip"} ${pct(l.casts, n, 0)}`,
-              ink: "var(--c1)",
-            }))}
-          />
+          <div className="spell-top">
+            <div className="spell-total">
+              <strong>{fmt(total)}</strong>
+              <span>casts</span>
+            </div>
+            <div className="spell-bar">
+              <SplitBar
+                parts={known.map((l) => ({
+                  value: l.casts,
+                  color: levelColor(l.level!, top),
+                  label: `${l.level ? `L${l.level}` : "Cantrip"} ${pct(l.casts, n, 0)}`,
+                  ink: "var(--c1)",
+                }))}
+              />
+            </div>
+          </div>
           <Legend items={known.map((l) => [`${l.level ? `Level ${l.level}` : "Cantrip"}: ${l.casts} (${pct(l.casts, n)})`, levelColor(l.level!, top)])} />
           <div className="table-scroll" style={{ marginTop: 12 }}>
             {byLevel ? (

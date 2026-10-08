@@ -27,6 +27,8 @@ export type CharacterCard = {
   name: string;
   campaign: string | null;
   className: string | null;
+  subclass: string | null; //e.g. Hexblade
+  level: number | null;
   rollCount: number;
   d20Count: number;
   avgD20: number | null; //fair die = 10.5
@@ -133,7 +135,7 @@ export async function fetchCharacters(): Promise<CharacterCard[]> {
 
   //four reads, joined here; same as LEFT JOINs from characters on character_id
   const [chars, sums, skills, lookup] = await Promise.all([
-    sb.from("characters").select("id, name, campaign, class_name, is_npc"),
+    sb.from("characters").select("id, name, campaign, class_name, subclass, level, is_npc"),
     sb.from("character_roll_summary").select("*"),
     sb.from("skill_roll_stats").select("character_id, skill_code, roll_count, avg_natural_d20"),
     sb.from("skills_abilities").select("code, name"),
@@ -172,7 +174,7 @@ export async function fetchCharacterDetail(id: number): Promise<CharacterDetail 
 
   //all six reads in parallel; RLS (or the function's own gate) filters each to public characters
   const [char, sum, skills, faces, lookup, sheet] = await Promise.all([
-    sb.from("characters").select("id, name, campaign, class_name").eq("id", id).maybeSingle(),
+    sb.from("characters").select("id, name, campaign, class_name, subclass, level").eq("id", id).maybeSingle(),
     sb.from("character_roll_summary").select("*").eq("character_id", id).maybeSingle(),
     sb.from("skill_roll_stats").select("*").eq("character_id", id),
     sb.from("die_cursedness_checks").select("face, times_rolled, observed_share").eq("character_id", id).eq("sides", 20),
@@ -233,6 +235,8 @@ function toCard(c: any, s?: any): CharacterCard {
     name: c.name,
     campaign: c.campaign ?? null,
     className: c.class_name ?? null,
+    subclass: c.subclass ?? null,
+    level: num(c.level),
     rollCount: num(s?.roll_count) ?? 0,
     d20Count: num(s?.d20_count) ?? 0,
     avgD20: num(s?.avg_natural_d20),

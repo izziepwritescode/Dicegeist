@@ -35,10 +35,10 @@ function rng(seed: number): () => number {
 //--------------------------------------------------------------------------------------------------------------
 
 const CHARS = [
-  { id: 1, name: "Lazlo", campaign: "Sample Campaign A", className: "Warlock", rolls: 900, platform: "roll20" },
-  { id: 2, name: "Vasha", campaign: "Sample Campaign B", className: "Paladin", rolls: 700, platform: "roll20" },
-  { id: 3, name: "Idris Ildroun", campaign: "Sample Campaign C", className: "Cleric", rolls: 720, platform: "foundry" },
-  { id: 4, name: "Ivan Maddock", campaign: "Sample Campaign D", className: "Sorcerer", rolls: 520, platform: "foundry" },
+  { id: 1, name: "Lazlo Remény-Benedek", campaign: "Sample Campaign A", className: "Warlock", subclass: "Hexblade", level: 12, rolls: 900, platform: "roll20" },
+  { id: 2, name: "Vasha Klenova", campaign: "Sample Campaign B", className: "Paladin", subclass: "Vengeance", level: 10, rolls: 700, platform: "roll20" },
+  { id: 3, name: "Idris Ildroun", campaign: "Sample Campaign C", className: "Cleric", subclass: "Twilight", level: 9, rolls: 720, platform: "foundry" },
+  { id: 4, name: "Ivan Maddock", campaign: "Sample Campaign D", className: "Sorcerer", subclass: "Spellfire", level: 6, rolls: 520, platform: "foundry" },
 ];
 
 const SKILLS = ["perception", "insight", "stealth", "arcana", "athletics", "persuasion", "investigation", "deception"];
@@ -65,6 +65,8 @@ export function demoCharacters(): CharacterCard[] {
       name: c.name,
       campaign: c.campaign,
       className: c.className,
+      subclass: c.subclass,
+      level: c.level,
       rollCount: c.rolls,
       d20Count: n,
       avgD20: Math.round(avg * 100) / 100,
