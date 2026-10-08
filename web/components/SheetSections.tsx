@@ -35,14 +35,14 @@ const DAMAGE_COLORS: Record<string, string> = {
   Bludgeoning: "#a68a6d", //brown
   Cold:        "#a6ecff", //ice
   Fire:        "#f5973a", //orange
-  Force:       "#9b7bff", //arcane violet
+  Force:       "#e5484d", //red (Izzie's pick)
   Lightning:   "#7fb2ff", //electric blue
   Necrotic:    "#4a8f86", //murky teal-green
   Piercing:    "#c4ccd6", //steel
   Poison:      "#4f9e3f", //green
   Psychic:     "#f28ad1", //pink
   Radiant:     "#f6d76b", //gold
-  Slashing:    "#c43a52", //crimson
+  Slashing:    "#8e2b3f", //dark maroon, kept apart from force red
   Thunder:     "#6c7bd9", //indigo
 };
 const UNTYPED_COLOR = "#8a8a8a"; //any type not in the map
@@ -373,13 +373,12 @@ export function SpellsCast({ levels, spells, total, byLevel = false }: { levels:
                 parts={known.map((l) => ({
                   value: l.casts,
                   color: levelColor(l.level!, top),
-                  label: `${l.level ? `L${l.level}` : "Cantrip"} ${pct(l.casts, n, 0)}`,
+                  label: `${l.level ? `Level ${l.level}` : "Cantrip"} ${pct(l.casts, n, 0)}`, //legend dropped, the table below names each level
                   ink: "var(--c1)",
                 }))}
               />
             </div>
           </div>
-          <Legend items={known.map((l) => [`${l.level ? `Level ${l.level}` : "Cantrip"}: ${l.casts} (${pct(l.casts, n)})`, levelColor(l.level!, top)])} />
           <div className="table-scroll" style={{ marginTop: 12 }}>
             {byLevel ? (
             <table className="data-table">
