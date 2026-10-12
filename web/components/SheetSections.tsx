@@ -204,19 +204,11 @@ export function AbilitiesArray({ abilities }: { abilities: SheetAbility[] }) {
 //params: attacks (CharacterSheet["attacks"]); total / hits (number)
 //output: JSX.Element
 export function AttackSplit({ attacks, total, hits }: { attacks: CharacterSheet["attacks"]; total: number; hits: number }) {
-  const b = attacks.basis;
-  //how each hit was decided, only the parts that apply
-  const basis = [
-    b.loggedAC && `${b.loggedAC} vs the AC Foundry logged`,
-    b.damageEvidence && `${b.damageEvidence} from damage rolled after the attack`,
-    b.slider && `${b.slider} vs the assumed AC`,
-  ].filter(Boolean).join(", ");
   return (
     <div className="card">
       <div className="section-head">
         <div>
           <h2>Attacks: Hit vs. Miss</h2>
-          <p>{total} attack rolls{basis && ` · ${basis}`}</p>
         </div>
       </div>
       {total ? (
