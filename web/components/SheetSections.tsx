@@ -224,7 +224,7 @@ export function AttackSplit({ attacks, total, hits }: { attacks: CharacterSheet[
           <SplitBar
             parts={[
               { value: hits, color: "var(--good)", label: `${hits} hit · ${pct(hits, total, 0)}`, ink: "var(--on-good)" },
-              { value: total - hits, color: "var(--critical)", label: `${total - hits} miss`, ink: "var(--on-critical)" },
+              { value: total - hits, color: "var(--critical)", label: `${total - hits} miss · ${pct(total - hits, total, 0)}`, ink: "var(--on-critical)" },
             ]}
           />
           {attacks.sources.map((s) => (
