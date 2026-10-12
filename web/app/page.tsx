@@ -24,7 +24,7 @@ import { AnimatePresence, motion } from "motion/react"; //panel entrance + info 
 import { useRef, useState } from "react";
 import { fetchCharacters, type CharacterCard } from "@/lib/data"; //Supabase reads
 import { useLive } from "@/lib/useLive"; //refresh on new rolls
-import { CountUp, LiveBadge } from "@/components/ui";
+import { CountUp } from "@/components/ui";
 import { D20Counter } from "@/components/D20Counter"; //hero die with total roll count
 import { paletteFor, themeVars } from "@/lib/themes"; //per-character colour ramps + accents
 
@@ -43,7 +43,7 @@ const EASE = [0.22, 1, 0.36, 1] as const; //same curve as --ease in globals.css
 // header + panels + info panel; active = hovered (desktop) or tapped (phone) character id
 //output: JSX.Element
 export default function Home() {
-  const { data, status, error, pulse } = useLive(fetchCharacters, []);
+  const { data, error, pulse } = useLive(fetchCharacters, []); //still auto-refreshes, no live badge shown
   const [active, setActive] = useState<number | null>(null);
   const total = data ? data.reduce((a, r) => a + r.rollCount, 0) : null;
   const activeChar = data?.find((c) => c.id === active) ?? null;
@@ -59,7 +59,6 @@ export default function Home() {
         <div>
           <div className="home-eyebrow">
             <span className="eyebrow">D&amp;D roll analytics</span>
-            <LiveBadge status={status} />
           </div>
           <h1 className="home-title">Calculated Strike</h1>
           <motion.hr
@@ -187,7 +186,7 @@ function Panel({
       >
         <span className="panel-name">{firstName(c.name)}</span>
         <span className="panel-foot">
-          <span className="panel-class">{c.className ?? "Adventurer"}</span>
+          <span className="panel-class">{[c.subclass, c.className].filter(Boolean).join(" ") || "Adventurer"}</span>
           {c.campaign && <span className="panel-campaign">{c.campaign}</span>}
         </span>
       </Link>
@@ -255,7 +254,7 @@ function NetTotals({ rows }: { rows: CharacterCard[] }) {
 function CharacterInfo({ c }: { c: CharacterCard }) {
   return (
     <>
-      <div className="eyebrow">{[c.className, c.campaign].filter(Boolean).join(" · ") || "Adventurer"}</div>
+      <div className="eyebrow">{[[c.subclass, c.className].filter(Boolean).join(" "), c.campaign].filter(Boolean).join(" · ") || "Adventurer"}</div>
       <h2 className="info-title">{c.name}</h2>
       <StatGrid
         stats={[

@@ -29,7 +29,7 @@ import { useCharacterTheme } from "@/lib/themes"; //character palette on the who
 export default function CharacterPage() {
   const { id } = useParams<{ id: string }>();
   const charId = Number(id);
-  const { data, status, error, loaded } = useLive(() => fetchCharacterDetail(charId), [charId]);
+  const { data, error, loaded } = useLive(() => fetchCharacterDetail(charId), [charId]);
 
   useCharacterTheme(data?.card.name); //page, header and charts take the character's ramp + accent
 
@@ -53,7 +53,7 @@ export default function CharacterPage() {
       {data && (
         <motion.div initial="hidden" animate="show" variants={{ show: { transition: { staggerChildren: 0.08 } } }}>
           <motion.div variants={rise}>
-            <CharacterHeader card={data.card} status={status} />
+            <CharacterHeader card={data.card} />
           </motion.div>
 
           {data.sheet ? (
