@@ -128,7 +128,7 @@ export function SheetKpis({ sheet }: { sheet: CharacterSheet }) {
       <StatTile label="Spells Cast" value={k.spellsCast} sub={`${fmt(k.spellDamage)} spell damage`} />
       {k.healHP !== null && (
         //roll20 healing logs are incomplete -> tile left off entirely for roll20 characters
-        <StatTile label="Healing (HP)" value={k.healHP} sub={<>{k.heals} heals{k.tempHP ? <><br />+{fmt(k.tempHP)} temp HP</> : null}</>} />
+        <StatTile label="Healing (HP)" value={k.healHP + (k.tempHP ?? 0) /* temp HP counted in the total */} sub={`${k.heals} heals`} />
       )}
       <StatTile label="Avg d20" value={k.avgD20} decimals={2} sub={k.expectedD20 === null ? undefined : `expected ${k.expectedD20.toFixed(2)}`} />
     </div>
