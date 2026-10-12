@@ -361,8 +361,8 @@ Character sheet sections (components/SheetSections.tsx); colours all come from t
 --------------------------------------------------------------------------------------------------------------*/
 .char-head {
   position: relative; isolation: isolate; overflow: hidden;
-  aspect-ratio: 2134 / 656; /* same shape as the splash art, so nothing is cropped */
-  min-height: 225px; margin-bottom: 20px; padding: 14px 28px 18px;
+  aspect-ratio: 2134 / 525; /* 20% shorter than the art (2134 x 656); art crops a little top + bottom */
+  min-height: 200px; margin-bottom: 20px; padding: 14px 28px 18px;
   border-radius: var(--radius); color: #fff;
   display: flex; flex-direction: column;
   background-color: var(--c1); background-size: cover; background-position: right center;
