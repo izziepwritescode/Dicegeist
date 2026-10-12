@@ -196,7 +196,6 @@ export function AbilitiesArray({ abilities }: { abilities: SheetAbility[] }) {
           );
         })}
       </div>
-      <p className="card-foot">Faded luck: under {MIN_ROLLS} rolls, too few to call lucky or unlucky. Best = highest total, modifiers included.</p>
     </div>
   );
 }
