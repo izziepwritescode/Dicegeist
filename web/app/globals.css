@@ -35,6 +35,8 @@ Tokens
   --below: #e34948;           /* diverging pole: unluckier than fair */
   --good: #0ca30c;            /* nat 20 */
   --critical: #d03b3b;        /* nat 1 */
+  --on-good: #ffffff;         /* label ink on hit fills */
+  --on-critical: #ffffff;     /* label ink on miss fills */
   --shadow: 0 10px 30px -14px rgba(20, 48, 58, 0.35);
   --accent-deep: #14303a;
   --on-accent: #ffffff;

@@ -223,8 +223,8 @@ export function AttackSplit({ attacks, total, hits }: { attacks: CharacterSheet[
         <>
           <SplitBar
             parts={[
-              { value: hits, color: "var(--good)", label: `${hits} hit · ${pct(hits, total, 0)}`, ink: "var(--on-accent)" },
-              { value: total - hits, color: "var(--critical)", label: `${total - hits} miss` },
+              { value: hits, color: "var(--good)", label: `${hits} hit · ${pct(hits, total, 0)}`, ink: "var(--on-good)" },
+              { value: total - hits, color: "var(--critical)", label: `${total - hits} miss`, ink: "var(--on-critical)" },
             ]}
           />
           {attacks.sources.map((s) => (
@@ -234,7 +234,7 @@ export function AttackSplit({ attacks, total, hits }: { attacks: CharacterSheet[
               value={s.hits}
               max={s.attacks}
               color="var(--good)"
-              rest="color-mix(in srgb, var(--critical) 70%, transparent)" //unfilled track = misses
+              rest="color-mix(in srgb, var(--critical) 75%, transparent)" //unfilled track = misses
               right={`${s.hits}/${s.attacks} · ${pct(s.hits, s.attacks, 0)}`}
             />
           ))}
@@ -373,7 +373,7 @@ export function SpellsCast({ levels, spells, total, byLevel = false }: { levels:
                   value: l.casts,
                   color: levelColor(l.level!, top),
                   label: `${l.level ? `Level ${l.level}` : "Cantrip"} ${pct(l.casts, n, 0)}`, //legend dropped, the table below names each level
-                  ink: "var(--c1)",
+                  ink: l.level! / top > 0.75 ? "#ffffff" : "var(--c1)", //white on the deep shades
                 }))}
               />
             </div>
@@ -564,10 +564,12 @@ function levelLabel(lo: number | null, hi: number | null): string {
   return lo === hi ? String(lo) : `${lo}–${hi}`; //upcast spells show their range
 }
 
-// level -> accent strength: cantrips lightest, top level full accent
+// level -> step along the hit colour: cantrips pale, middle levels full colour, top level deep shade
 //params: level (number); top (number) - highest level cast
 //output: string - css colour
 function levelColor(level: number, top: number): string {
-  const strength = 35 + Math.round((65 * level) / top); //35%..100% accent over the light ramp step
-  return `color-mix(in srgb, var(--accent) ${strength}%, var(--c5))`;
+  const t = top ? level / top : 0; //0..1 position, like a percent rank
+  return t <= 0.5
+    ? `color-mix(in srgb, var(--good) ${Math.round(30 + 140 * t)}%, #ffffff)` //30%..100% colour over white
+    : `color-mix(in srgb, var(--good) ${Math.round(100 - 90 * (t - 0.5))}%, #000000)`; //100%..55% colour over black
 }

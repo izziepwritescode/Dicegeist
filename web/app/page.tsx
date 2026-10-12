@@ -275,7 +275,7 @@ function CharacterInfo({ c }: { c: CharacterCard }) {
           )}
         </dl>
       )}
-      <Link href={`/character/${c.id}`} className="info-hint info-link">Open full breakdown →</Link>
+      <p className="info-hint">Click character card for full breakdown</p>
     </>
   );
 }
