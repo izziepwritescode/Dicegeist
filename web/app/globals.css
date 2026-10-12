@@ -262,7 +262,7 @@ Home v2: header, character panels, info panel
 .panel-class { font-size: 1rem; font-weight: 800; color: var(--accent); } /* accent on darkest ramp step */
 .panel-campaign { font-size: 0.75rem; color: var(--c5); }
 
-/* bracket under each platform group: bottom border + end ticks, label centred below */
+/* bracket under each platform group: bottom border + end ticks, label centerd below */
 .panel-bracket {
   position: relative; height: 14px; margin: 14px 4px 0;
   border: 2px solid var(--ink-muted); border-top: 0; border-radius: 0 0 6px 6px;

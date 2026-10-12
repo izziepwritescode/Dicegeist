@@ -16,7 +16,7 @@ import { animate, motion, useMotionValue, useTransform } from "motion/react"; //
 import { useEffect, useRef } from "react";
 
 //--------------------------------------------------------------------------------------------------------------
-//Geometry (pointy-top hexagon outline + centre face, the classic d20 drawing)
+//Geometry (pointy-top hexagon outline + center face, the classic d20 drawing)
 //--------------------------------------------------------------------------------------------------------------
 
 const HEX = "100,4 183,52 183,148 100,196 17,148 17,52"; //outer silhouette, clockwise from top

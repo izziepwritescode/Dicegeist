@@ -30,7 +30,7 @@ const MIN_ROLLS = 5; //below this, an average is mostly noise -> bar drawn faded
 //output: JSX.Element
 export function SkillChart({ skills }: { skills: SkillStat[] }) {
   const [table, setTable] = useState(false);
-  const rows = skills.filter((s) => s.avgD20 !== null);
+  const rows = skills.filter((s) => s.avgD20 !== null && s.code !== null); //unlabelled checks (no skill tag) left out
 
   //symmetric scale around fair, at least ±2 so small differences do not look dramatic
   const span = Math.max(2, ...rows.map((s) => Math.abs((s.avgD20 ?? FAIR_D20) - FAIR_D20)));
@@ -40,7 +40,7 @@ export function SkillChart({ skills }: { skills: SkillStat[] }) {
       <div className="section-head">
         <div>
           <h2>Skill Checks</h2>
-          <p>Average natural d20 per skill, before modifiers. Centre line = fair 10.5.</p>
+          <p>Average natural d20 per skill, before modifiers. Center line = fair 10.5.</p>
         </div>
         <button className="toggle" onClick={() => setTable((t) => !t)} aria-pressed={table}>
           {table ? "Show chart" : "Show table"}
@@ -82,7 +82,7 @@ export function SkillChart({ skills }: { skills: SkillStat[] }) {
                 title={`${s.name}: avg d20 ${s.avgD20?.toFixed(2)} over ${s.rollCount} rolls`}
               >
                 <span style={{ color: "var(--ink-2)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
-                  {s.name} <span style={{ color: "var(--ink-muted)" }}>({s.rollCount})</span>
+                  {s.name}
                 </span>
                 <div style={{ position: "relative", height: 18 }}>
                   <div style={{ position: "absolute", left: "50%", top: -3, bottom: -3, width: 1, background: "var(--ink-muted)" }} />

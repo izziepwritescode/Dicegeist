@@ -170,7 +170,7 @@ function Panel({
     <motion.div
       className="panel-wrap"
       initial={{ opacity: 0, y: 24 }}
-      animate={{ opacity: 1, y: 0, scale: isActive ? 1.04 : 1 }} //scale from centre: grows in place, neighbours stay put
+      animate={{ opacity: 1, y: 0, scale: isActive ? 1.04 : 1 }} //scale from center: grows in place, neighbours stay put
       transition={{ duration: 0.5, ease: EASE, delay: isActive ? 0 : delay, scale: { duration: 0.3, ease: EASE } }}
       style={{ zIndex: isActive ? 2 : 1 }} //grown panel sits over its neighbours' edges
     >
