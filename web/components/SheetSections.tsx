@@ -145,7 +145,7 @@ export function AbilitiesArray({ abilities }: { abilities: SheetAbility[] }) {
     <div className="card">
       <div className="section-head">
         <div>
-          <h2>Abilities</h2>
+          <h2>Ability Scores</h2>
           <p>
             Score and modifier, then how the d20 has treated each ability: the average natural roll (before modifiers) next to
             10.5, the average for a d20. &ldquo;1.2 above average&rdquo; means the die has landed 1.2 higher than average,
