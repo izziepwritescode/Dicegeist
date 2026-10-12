@@ -57,9 +57,6 @@ export default function Home() {
           <span className="home-die-caption">&amp; counting</span>
         </div>
         <div>
-          <div className="home-eyebrow">
-            <span className="eyebrow">D&amp;D roll analytics</span>
-          </div>
           <h1 className="home-title">Calculated Strike</h1>
           <motion.hr
             className="home-rule"
