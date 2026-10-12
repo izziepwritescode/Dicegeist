@@ -64,24 +64,16 @@ export default function CharacterPage() {
               <motion.div variants={rise}>
                 <AbilitiesArray abilities={data.sheet.abilities} />
               </motion.div>
-              {/*sketch layout: attacks | damage, spells | play nights, d20 | skills*/}
-              <motion.div className="sheet-grid" variants={rise}>
-                <div className="span-6">
+              {/*two independent columns: each card sits right under the one above it, no gaps beside shorter cards*/}
+              <motion.div className="sheet-cols" variants={rise}>
+                <div className="sheet-col">
                   <AttackSplit attacks={data.sheet.attacks} total={data.sheet.kpis.attacks} hits={data.sheet.kpis.hits} />
-                </div>
-                <div className="span-6">
-                  <DamageByType types={data.sheet.damageTypes} />
-                </div>
-                <div className="span-6">
                   <SpellsCast levels={data.sheet.spellLevels} spells={data.sheet.spells} total={data.sheet.kpis.spellsCast} byLevel={data.sheet.kpis.platform === "roll20"} />
-                </div>
-                <div className="span-6">
-                  <NightsChart nights={data.sheet.nights} />
-                </div>
-                <div className="span-6">
                   <FaceChart faces={data.faces} />
                 </div>
-                <div className="span-6">
+                <div className="sheet-col">
+                  <DamageByType types={data.sheet.damageTypes} />
+                  <NightsChart nights={data.sheet.nights} />
                   <SkillChart skills={data.skills} />
                 </div>
               </motion.div>

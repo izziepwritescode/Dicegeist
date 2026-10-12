@@ -310,6 +310,16 @@ Home v2: header, character panels, info panel
 Character sheet sections (components/SheetSections.tsx); colours all come from the character theme vars
 --------------------------------------------------------------------------------------------------------------*/
 
+.sheet-cols { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; align-items: start; margin-top: 20px; } /* left: attacks, spells, d20 | right: damage, nights, skills */
+.sheet-col { display: flex; flex-direction: column; gap: 16px; min-width: 0; }
+.sheet-col > .card { margin: 0; }
+@media (max-width: 900px) { /* one column, cards back in reading order: attacks, damage, spells, nights, d20, skills */
+  .sheet-cols { display: flex; flex-direction: column; }
+  .sheet-col { display: contents; }
+  .sheet-col:first-child > :nth-child(1) { order: 1; } .sheet-col:last-child > :nth-child(1) { order: 2; }
+  .sheet-col:first-child > :nth-child(2) { order: 3; } .sheet-col:last-child > :nth-child(2) { order: 4; }
+  .sheet-col:first-child > :nth-child(3) { order: 5; } .sheet-col:last-child > :nth-child(3) { order: 6; }
+}
 .sheet-grid { display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); gap: 16px; margin-top: 20px; }
 .span-5 { grid-column: span 5; } .span-6 { grid-column: span 6; } .span-7 { grid-column: span 7; } .span-12 { grid-column: span 12; }
 @media (max-width: 900px) { .span-5, .span-6, .span-7 { grid-column: span 12; } }

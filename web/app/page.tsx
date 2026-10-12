@@ -243,7 +243,7 @@ function NetTotals({ rows }: { rows: CharacterCard[] }) {
           ["Total damage", sum("totalDamage"), 0],
         ]}
       />
-      <p className="info-hint">Hover a character to see their totals.</p>
+      <p className="info-hint">Click for expanded stats</p>
     </>
   );
 }
