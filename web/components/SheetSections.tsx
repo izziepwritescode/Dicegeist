@@ -121,11 +121,11 @@ export function SheetKpis({ sheet }: { sheet: CharacterSheet }) {
   return (
     <div className="stats-row stats-row-8 stats-strip" style={{ "--tiles": k.healHP === null ? 7 : 8 } as React.CSSProperties}>
       <StatTile label="Total rolls" value={k.rolls} sub={`${fmt(k.d20s)} with a d20`} />
-      <StatTile label="Nat 20s" value={k.nat20s} sub={`${pct(k.nat20s, k.d20s)} (fair 5%)`} />
-      <StatTile label="Nat 1s" value={k.nat1s} sub={`${pct(k.nat1s, k.d20s)} (fair 5%)`} />
-      <StatTile label="Attacks" value={k.attacks} sub={`${pct(k.hits, k.attacks, 0)} hit`} />
+      <StatTile label="Natural 20s" value={k.nat20s} sub={`${pct(k.nat20s, k.d20s)} (fair 5%)`} />
+      <StatTile label="Natural 1s" value={k.nat1s} sub={`${pct(k.nat1s, k.d20s)} (fair 5%)`} />
+      <StatTile label="Attacks" value={k.attacks} sub={`${pct(k.hits, k.attacks, 0)} hit rate`} />
       <StatTile label="Total damage" value={k.damage} sub={`${pct(k.spellDamage, k.damage, 0)} from spells`} />
-      <StatTile label="Spells cast" value={k.spellsCast} />
+      <StatTile label="Spells cast" value={k.spellsCast} sub={`${fmt(k.spellDamage)} spell damage`} />
       {k.healHP !== null && (
         //roll20 healing logs are incomplete -> tile left off entirely for roll20 characters
         <StatTile label="Healing (HP)" value={k.healHP} sub={<>{k.heals} heals{k.tempHP ? <><br />+{fmt(k.tempHP)} temp HP</> : null}</>} />

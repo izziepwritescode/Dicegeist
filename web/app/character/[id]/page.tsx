@@ -59,10 +59,10 @@ export default function CharacterPage() {
           {data.sheet ? (
             <>
               <motion.div variants={rise}>
-                <AbilitiesArray abilities={data.sheet.abilities} />
+                <SheetKpis sheet={data.sheet} />
               </motion.div>
               <motion.div variants={rise}>
-                <SheetKpis sheet={data.sheet} />
+                <AbilitiesArray abilities={data.sheet.abilities} />
               </motion.div>
               {/*sketch layout: attacks | damage, spells | play nights, d20 | skills*/}
               <motion.div className="sheet-grid" variants={rise}>
