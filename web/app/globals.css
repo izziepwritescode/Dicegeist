@@ -233,7 +233,7 @@ Home v2: header, character panels, info panel
 .home-die .d20-counter { width: clamp(110px, 15vw, 170px); }
 .home-die-caption { font-size: 0.8rem; color: var(--ink-2); letter-spacing: 0.08em; text-transform: uppercase; margin-top: 6px; }
 .home-title { font-size: clamp(2.5rem, 7vw, 4.5rem); line-height: 1; margin: 8px 0 14px; text-transform: uppercase; letter-spacing: 0.04em; }
-.home-rule { border: 0; height: 2px; background: linear-gradient(90deg, var(--accent), transparent); transform-origin: left; margin-bottom: 14px; max-width: 520px; }
+.home-rule { display: block; width: 100%; max-width: 760px; height: auto; fill: var(--accent); margin: 2px 0 12px; } /* sword divider; scales with the title */
 .home-desc { color: var(--ink-2); max-width: 60ch; }
 
 .home-body { --panel-h: 412px; display: grid; grid-template-columns: minmax(0, 1fr) 340px; gap: 24px; align-items: start; } /* --panel-h: card height, shared by the info panel */
