@@ -1,5 +1,5 @@
 // character page header: splash art band with the name, class line and campaign / last roll in white
-// Usage Syntax: <CharacterHeader card={detail.card} status={status} />
+// Usage Syntax: <CharacterHeader card={detail.card} />
 //--------------------------------------------------------------------------------------------------------------
 // Outline
 //   Constants
@@ -14,16 +14,18 @@
 
 import Link from "next/link"; //client-side navigation
 import type { CharacterCard } from "@/lib/data";
-import type { LiveStatus } from "@/lib/useLive"; //status union from the live hook
-import { LiveBadge } from "./ui";
 
 //--------------------------------------------------------------------------------------------------------------
 //Constants
 //--------------------------------------------------------------------------------------------------------------
 
 //keyed by lowercase first name (same key as the palettes); files live in web/public/art
+//standard size: 2134 x 656 px (Izzie's 4267 x 1312 drafts at half size), art on the right, plain left for the text
 const ART: Record<string, string> = {
   lazlo: "/art/lazlo.jpg",
+  vasha: "/art/vasha.jpg",
+  idris: "/art/idris.jpg",
+  ivan: "/art/ivan.jpg",
 };
 
 //--------------------------------------------------------------------------------------------------------------
@@ -31,9 +33,9 @@ const ART: Record<string, string> = {
 //--------------------------------------------------------------------------------------------------------------
 
 // splash band; characters without art get a tinted placeholder from their own ramp
-//params: card (CharacterCard); status (LiveStatus) - live badge state
+//params: card (CharacterCard)
 //output: JSX.Element
-export function CharacterHeader({ card, status }: { card: CharacterCard; status: LiveStatus }) {
+export function CharacterHeader({ card }: { card: CharacterCard }) {
   const [first, rest] = splitName(card.name);
   const art = ART[first.toLowerCase()];
   const classLine = [card.subclass, card.className].filter(Boolean).join(" ") + (card.level ? ` · Lvl ${card.level}` : "");
@@ -45,7 +47,6 @@ export function CharacterHeader({ card, status }: { card: CharacterCard; status:
     <header className={`char-head ${art ? "has-art" : "no-art"}`} style={art ? { backgroundImage: `url(${art})` } : undefined}>
       <div className="char-head-top">
         <Link href="/" className="char-head-back">← All characters</Link>
-        <LiveBadge status={status} />
       </div>
       <div className="char-head-name">
         <h1>{first}</h1>

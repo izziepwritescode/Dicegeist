@@ -29,7 +29,7 @@ import { useCharacterTheme } from "@/lib/themes"; //character palette on the who
 export default function CharacterPage() {
   const { id } = useParams<{ id: string }>();
   const charId = Number(id);
-  const { data, status, error, loaded } = useLive(() => fetchCharacterDetail(charId), [charId]);
+  const { data, error, loaded } = useLive(() => fetchCharacterDetail(charId), [charId]);
 
   useCharacterTheme(data?.card.name); //page, header and charts take the character's ramp + accent
 
@@ -53,35 +53,27 @@ export default function CharacterPage() {
       {data && (
         <motion.div initial="hidden" animate="show" variants={{ show: { transition: { staggerChildren: 0.08 } } }}>
           <motion.div variants={rise}>
-            <CharacterHeader card={data.card} status={status} />
+            <CharacterHeader card={data.card} />
           </motion.div>
 
           {data.sheet ? (
             <>
               <motion.div variants={rise}>
-                <AbilitiesArray abilities={data.sheet.abilities} />
-              </motion.div>
-              <motion.div variants={rise}>
                 <SheetKpis sheet={data.sheet} />
               </motion.div>
-              {/*sketch layout: attacks | damage, spells | play nights, d20 | skills*/}
-              <motion.div className="sheet-grid" variants={rise}>
-                <div className="span-6">
+              <motion.div variants={rise}>
+                <AbilitiesArray abilities={data.sheet.abilities} />
+              </motion.div>
+              {/*two independent columns: each card sits right under the one above it, no gaps beside shorter cards*/}
+              <motion.div className="sheet-cols" variants={rise}>
+                <div className="sheet-col">
                   <AttackSplit attacks={data.sheet.attacks} total={data.sheet.kpis.attacks} hits={data.sheet.kpis.hits} />
-                </div>
-                <div className="span-6">
-                  <DamageByType types={data.sheet.damageTypes} />
-                </div>
-                <div className="span-6">
                   <SpellsCast levels={data.sheet.spellLevels} spells={data.sheet.spells} total={data.sheet.kpis.spellsCast} byLevel={data.sheet.kpis.platform === "roll20"} />
-                </div>
-                <div className="span-6">
-                  <NightsChart nights={data.sheet.nights} />
-                </div>
-                <div className="span-6">
                   <FaceChart faces={data.faces} />
                 </div>
-                <div className="span-6">
+                <div className="sheet-col">
+                  <DamageByType types={data.sheet.damageTypes} />
+                  <NightsChart nights={data.sheet.nights} />
                   <SkillChart skills={data.skills} />
                 </div>
               </motion.div>

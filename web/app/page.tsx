@@ -24,7 +24,7 @@ import { AnimatePresence, motion } from "motion/react"; //panel entrance + info 
 import { useRef, useState } from "react";
 import { fetchCharacters, type CharacterCard } from "@/lib/data"; //Supabase reads
 import { useLive } from "@/lib/useLive"; //refresh on new rolls
-import { CountUp, LiveBadge } from "@/components/ui";
+import { CountUp } from "@/components/ui";
 import { D20Counter } from "@/components/D20Counter"; //hero die with total roll count
 import { paletteFor, themeVars } from "@/lib/themes"; //per-character colour ramps + accents
 
@@ -43,7 +43,7 @@ const EASE = [0.22, 1, 0.36, 1] as const; //same curve as --ease in globals.css
 // header + panels + info panel; active = hovered (desktop) or tapped (phone) character id
 //output: JSX.Element
 export default function Home() {
-  const { data, status, error, pulse } = useLive(fetchCharacters, []);
+  const { data, error, pulse } = useLive(fetchCharacters, []); //still auto-refreshes, no live badge shown
   const [active, setActive] = useState<number | null>(null);
   const total = data ? data.reduce((a, r) => a + r.rollCount, 0) : null;
   const activeChar = data?.find((c) => c.id === active) ?? null;
@@ -59,7 +59,6 @@ export default function Home() {
         <div>
           <div className="home-eyebrow">
             <span className="eyebrow">D&amp;D roll analytics</span>
-            <LiveBadge status={status} />
           </div>
           <h1 className="home-title">Calculated Strike</h1>
           <motion.hr
@@ -69,8 +68,8 @@ export default function Home() {
             transition={{ duration: 0.9, ease: EASE, delay: 0.2 }}
           />
           <p className="home-desc">
-            Every die rolled across my online campaigns, bulk-imported from Roll20 and Foundry and crunched per
-            character and per skill. A fair d20 averages 10.5. Anything else is the dice gods playing favourites.
+            A live-service statistical analysis tool that ingests virtual tabletop D&amp;D dice rolls and crunches
+            metrics for my characters. Beta Version 1.2. Next update: Upload your own data for your own characters!
           </p>
         </div>
       </section>
@@ -187,7 +186,7 @@ function Panel({
       >
         <span className="panel-name">{firstName(c.name)}</span>
         <span className="panel-foot">
-          <span className="panel-class">{c.className ?? "Adventurer"}</span>
+          <span className="panel-class">{[c.subclass, c.className].filter(Boolean).join(" ") || "Adventurer"}</span>
           {c.campaign && <span className="panel-campaign">{c.campaign}</span>}
         </span>
       </Link>
@@ -208,6 +207,7 @@ function InfoPanel({ rows, active, pulse }: { rows: CharacterCard[]; active: Cha
       <AnimatePresence mode="wait">
         <motion.div
           key={active?.id ?? "totals"} //new key -> old content fades out, new fades in
+          className="info-body"
           initial={{ opacity: 0, y: 8 }}
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: -8 }}
@@ -231,20 +231,20 @@ function NetTotals({ rows }: { rows: CharacterCard[] }) {
     rows.some((r) => r[k] !== null) ? rows.reduce((a, r) => a + (r[k] ?? 0), 0) : null; //all blank -> blank, not 0
   return (
     <>
-      <div className="eyebrow">All characters</div>
-      <h2 className="info-title">Net totals</h2>
+      <div className="eyebrow">All Characters</div>
+      <h2 className="info-title">Net Totals</h2>
       <StatGrid
         stats={[
-          ["d20s rolled", d20s, 0],
+          ["d20s Rolled", d20s, 0],
           ["Average d20", avg, 2],
           ["Natural 20s", rows.reduce((a, r) => a + r.nat20s, 0), 0],
           ["Natural 1s", rows.reduce((a, r) => a + r.nat1s, 0), 0],
           ["Attacks", sum("attacks"), 0],
-          ["Spells cast", sum("spellsCast"), 0],
-          ["Total damage", sum("totalDamage"), 0],
+          ["Spells Cast", sum("spellsCast"), 0],
+          ["Total Damage", sum("totalDamage"), 0],
         ]}
       />
-      <p className="info-hint">Hover a character to see their totals.</p>
+      <p className="info-hint">Click for expanded stats</p>
     </>
   );
 }
@@ -255,7 +255,7 @@ function NetTotals({ rows }: { rows: CharacterCard[] }) {
 function CharacterInfo({ c }: { c: CharacterCard }) {
   return (
     <>
-      <div className="eyebrow">{[c.className, c.campaign].filter(Boolean).join(" · ") || "Adventurer"}</div>
+      <div className="eyebrow">{[[c.subclass, c.className].filter(Boolean).join(" "), c.campaign].filter(Boolean).join(" · ") || "Adventurer"}</div>
       <h2 className="info-title">{c.name}</h2>
       <StatGrid
         stats={[
@@ -264,17 +264,17 @@ function CharacterInfo({ c }: { c: CharacterCard }) {
           ["Natural 20s", c.nat20s, 0],
           ["Natural 1s", c.nat1s, 0],
           ["Attacks", c.attacks, 0],
-          ["Spells cast", c.spellsCast, 0],
-          ["Total damage", c.totalDamage, 0],
+          ["Spells Cast", c.spellsCast, 0],
+          ["Total Damage", c.totalDamage, 0],
         ]}
       />
       {(c.bestSkill || c.worstSkill) && (
         <dl className="info-skills">
           {c.bestSkill && (
-            <div><dt>Luckiest skill</dt><dd>{c.bestSkill.name} <span>{c.bestSkill.avgD20.toFixed(2)}</span></dd></div>
+            <div><dt>Luckiest Skill</dt><dd>{c.bestSkill.name} <span>{c.bestSkill.avgD20.toFixed(2)}</span></dd></div>
           )}
           {c.worstSkill && (
-            <div><dt>Unluckiest skill</dt><dd>{c.worstSkill.name} <span>{c.worstSkill.avgD20.toFixed(2)}</span></dd></div>
+            <div><dt>Unluckiest Skill</dt><dd>{c.worstSkill.name} <span>{c.worstSkill.avgD20.toFixed(2)}</span></dd></div>
           )}
         </dl>
       )}

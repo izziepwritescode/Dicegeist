@@ -80,7 +80,7 @@ export function CountUp({ value, decimals = 0, suffix = "" }: { value: number; d
     const el = ref.current;
     //tween text directly, no React re-render per frame
     const ctl = animate(from.current, value, {
-      duration: 1.1,
+      duration: 0.9, //1.1s / 1.2 -> 20% faster tick-up
       ease: [0.22, 1, 0.36, 1],
       onUpdate: (v) => (el.textContent = fmt.format(v) + suffix),
     });
