@@ -32,7 +32,7 @@ export function SkillChart({ skills }: { skills: SkillStat[] }) {
       <div className="section-head">
         <div>
           <h2>Skill Checks</h2>
-          <p>Average natural d20 per skill, before modifiers. Center line = fair 10.5.</p>
+          <p>Average natural d20 per skill, before modifiers. Center line = average 10.5.</p>
         </div>
         <button className="toggle" onClick={() => setTable((t) => !t)} aria-pressed={table}>
           {table ? "Show chart" : "Show table"}

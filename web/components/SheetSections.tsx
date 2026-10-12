@@ -148,8 +148,8 @@ export function AbilitiesArray({ abilities }: { abilities: SheetAbility[] }) {
           <h2>Abilities</h2>
           <p>
             Score and modifier, then how the d20 has treated each ability: the average natural roll (before modifiers) next to
-            10.5, what a fair d20 averages. &ldquo;1.2 above fair&rdquo; means the die has landed 1.2 higher than a fair one would,
-            per roll on average. From {fmt(rolls)} ability checks, skills and initiative (initiative counts as DEX); saving
+            10.5, the average for a d20. &ldquo;1.2 above average&rdquo; means the die has landed 1.2 higher than average,
+            per roll. From {fmt(rolls)} ability checks, skills and initiative (initiative counts as DEX); saving
             throws are left out.
           </p>
         </div>
@@ -187,7 +187,7 @@ export function AbilitiesArray({ abilities }: { abilities: SheetAbility[] }) {
                 {a.rolls > 0 && (
                   //points on the d20, not a percent: avg natural roll minus 10.5
                   <div className="abil-vs" style={{ color: d >= 0 && !thin ? "var(--accent)" : "var(--ink-2)" }}>
-                    {Math.abs(d) < 0.05 ? "right on fair" : `${Math.abs(d).toFixed(1)} ${d > 0 ? "above" : "below"} fair`}
+                    {Math.abs(d) < 0.05 ? "right on average" : `${Math.abs(d).toFixed(1)} ${d > 0 ? "above" : "below"} average`}
                   </div>
                 )}
               </div>
