@@ -282,7 +282,7 @@ export function DamageByType({ types: rows }: { types: CharacterSheet["damageTyp
       <div className="section-head">
         <div>
           <h2>Damage by Type</h2>
-          <p>{fmt(total)} damage across {fmt(rolls)} rolls with a damage type</p>
+          <p>{fmt(total)} damage across {fmt(rolls)} rolls</p>
         </div>
       </div>
       {total ? (
