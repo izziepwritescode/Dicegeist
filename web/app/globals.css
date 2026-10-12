@@ -35,6 +35,8 @@ Tokens
   --below: #e34948;           /* diverging pole: unluckier than fair */
   --good: #0ca30c;            /* nat 20 */
   --critical: #d03b3b;        /* nat 1 */
+  --on-good: #ffffff;         /* label ink on hit fills */
+  --on-critical: #ffffff;     /* label ink on miss fills */
   --shadow: 0 10px 30px -14px rgba(20, 48, 58, 0.35);
   --accent-deep: #14303a;
   --on-accent: #ffffff;
@@ -230,9 +232,8 @@ Home v2: header, character panels, info panel
 .home-die { display: flex; flex-direction: column; align-items: center; flex-shrink: 0; }
 .home-die .d20-counter { width: clamp(110px, 15vw, 170px); }
 .home-die-caption { font-size: 0.8rem; color: var(--ink-2); letter-spacing: 0.08em; text-transform: uppercase; margin-top: 6px; }
-.home-eyebrow { display: flex; gap: 10px; row-gap: 6px; align-items: center; flex-wrap: wrap; }
 .home-title { font-size: clamp(2.5rem, 7vw, 4.5rem); line-height: 1; margin: 8px 0 14px; text-transform: uppercase; letter-spacing: 0.04em; }
-.home-rule { border: 0; height: 2px; background: linear-gradient(90deg, var(--accent), transparent); transform-origin: left; margin-bottom: 14px; max-width: 520px; }
+.home-rule { display: block; width: 100%; max-width: 760px; height: auto; fill: var(--accent); margin: 2px 0 12px; } /* sword divider; scales with the title */
 .home-desc { color: var(--ink-2); max-width: 60ch; }
 
 .home-body { --panel-h: 412px; display: grid; grid-template-columns: minmax(0, 1fr) 340px; gap: 24px; align-items: start; } /* --panel-h: card height, shared by the info panel */
@@ -262,7 +263,7 @@ Home v2: header, character panels, info panel
 .panel-class { font-size: 1rem; font-weight: 800; color: var(--accent); } /* accent on darkest ramp step */
 .panel-campaign { font-size: 0.75rem; color: var(--c5); }
 
-/* bracket under each platform group: bottom border + end ticks, label centred below */
+/* bracket under each platform group: bottom border + end ticks, label centerd below */
 .panel-bracket {
   position: relative; height: 14px; margin: 14px 4px 0;
   border: 2px solid var(--ink-muted); border-top: 0; border-radius: 0 0 6px 6px;

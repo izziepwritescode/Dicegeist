@@ -27,14 +27,16 @@ export type Palette = {
   ramp: [string, string, string, string, string]; //c1 darkest .. c5 lightest
   accent: string; //light accent: key metrics on dark ramp surfaces (>= 3:1 on c1)
   accentDeep: string; //darker accent variant
+  good: string; //hits, natural 20s, best streak (the accent, lifted where it is too dark)
+  bad: string; //misses, natural 1s, worst streak: the colour opposite the accent so the two never blur
 };
 
 //keyed by lowercase first name; characters without an entry fall back to the main theme
 export const PALETTES: Record<string, Palette> = {
-  lazlo: { ramp: ["#2c133b", "#482a5e", "#644678", "#8d71a1", "#a78eb8"], accent: "#a4eac6", accentDeep: "#91c8ab" }, //purple + mint
-  vasha: { ramp: ["#421913", "#682920", "#934f44", "#b47d78", "#d8b1ac"], accent: "#417e6c", accentDeep: "#346051" }, //red + teal
-  idris: { ramp: ["#11223e", "#223555", "#3e567a", "#586f91", "#90a3c1"], accent: "#d6ad6d", accentDeep: "#b3823d" }, //blue + gold
-  ivan: { ramp: ["#30390a", "#46501b", "#5d6732", "#7d8755", "#9ca47b"], accent: "#c87c5a", accentDeep: "#a65a36" }, //green + orange
+  lazlo: { ramp: ["#2c133b", "#482a5e", "#644678", "#8d71a1", "#a78eb8"], accent: "#a4eac6", accentDeep: "#91c8ab", good: "#a4eac6", bad: "#ff8a8a" }, //purple + mint; misses coral
+  vasha: { ramp: ["#421913", "#682920", "#934f44", "#b47d78", "#d8b1ac"], accent: "#417e6c", accentDeep: "#346051", good: "#5fc4a6", bad: "#f0c674" }, //red + teal; misses gold
+  idris: { ramp: ["#11223e", "#223555", "#3e567a", "#586f91", "#90a3c1"], accent: "#d6ad6d", accentDeep: "#b3823d", good: "#d6ad6d", bad: "#8fc8ff" }, //blue + gold; misses sky blue
+  ivan: { ramp: ["#30390a", "#46501b", "#5d6732", "#7d8755", "#9ca47b"], accent: "#c87c5a", accentDeep: "#a65a36", good: "#c87c5a", bad: "#6cc4c0" }, //green + orange; misses teal
 };
 
 //--------------------------------------------------------------------------------------------------------------
@@ -71,8 +73,10 @@ export function themeVars(name: string | null | undefined): Record<string, strin
     "--bar": c4,
     "--above": p.accent,
     "--below": c4,
-    "--good": p.accent,
-    "--critical": "#e66767",
+    "--good": p.good,
+    "--critical": p.bad,
+    "--on-good": luminance(p.good) > 0.25 ? c1 : "#ffffff", //label ink on hit fills
+    "--on-critical": luminance(p.bad) > 0.25 ? c1 : "#ffffff", //label ink on miss fills
     "--accent-deep": p.accentDeep,
     "--on-accent": luminance(p.accent) > 0.25 ? c1 : "#ffffff", //text on accent fills: dark on mint / gold / orange, white on Vasha's teal
     "--c1": c1,

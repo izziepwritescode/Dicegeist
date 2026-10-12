@@ -2,8 +2,6 @@
 // Usage Syntax: <SkillChart skills={detail.skills} />
 //--------------------------------------------------------------------------------------------------------------
 // Outline
-//   Constants
-//     MIN_ROLLS
 //   Chart
 //     SkillChart
 //--------------------------------------------------------------------------------------------------------------
@@ -16,12 +14,6 @@ import type { SkillStat } from "@/lib/data";
 import { FAIR_D20 } from "./ui";
 
 //--------------------------------------------------------------------------------------------------------------
-//Constants
-//--------------------------------------------------------------------------------------------------------------
-
-const MIN_ROLLS = 5; //below this, an average is mostly noise -> bar drawn faded
-
-//--------------------------------------------------------------------------------------------------------------
 //Chart
 //--------------------------------------------------------------------------------------------------------------
 
@@ -30,7 +22,7 @@ const MIN_ROLLS = 5; //below this, an average is mostly noise -> bar drawn faded
 //output: JSX.Element
 export function SkillChart({ skills }: { skills: SkillStat[] }) {
   const [table, setTable] = useState(false);
-  const rows = skills.filter((s) => s.avgD20 !== null);
+  const rows = skills.filter((s) => s.avgD20 !== null && s.code !== null); //unlabelled checks (no skill tag) left out
 
   //symmetric scale around fair, at least ±2 so small differences do not look dramatic
   const span = Math.max(2, ...rows.map((s) => Math.abs((s.avgD20 ?? FAIR_D20) - FAIR_D20)));
@@ -40,7 +32,7 @@ export function SkillChart({ skills }: { skills: SkillStat[] }) {
       <div className="section-head">
         <div>
           <h2>Skill Checks</h2>
-          <p>Average natural d20 per skill, before modifiers. Centre line = fair 10.5.</p>
+          <p>Average natural d20 per skill, before modifiers. Center line = average 10.5.</p>
         </div>
         <button className="toggle" onClick={() => setTable((t) => !t)} aria-pressed={table}>
           {table ? "Show chart" : "Show table"}
@@ -74,7 +66,6 @@ export function SkillChart({ skills }: { skills: SkillStat[] }) {
           {rows.map((s, i) => {
             const delta = (s.avgD20 ?? FAIR_D20) - FAIR_D20;
             const w = (Math.abs(delta) / span) * 50; //% of track; half the track each side
-            const thin = s.rollCount < MIN_ROLLS;
             return (
               <div
                 key={s.code ?? "none"}
@@ -82,7 +73,7 @@ export function SkillChart({ skills }: { skills: SkillStat[] }) {
                 title={`${s.name}: avg d20 ${s.avgD20?.toFixed(2)} over ${s.rollCount} rolls`}
               >
                 <span style={{ color: "var(--ink-2)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
-                  {s.name} <span style={{ color: "var(--ink-muted)" }}>({s.rollCount})</span>
+                  {s.name}
                 </span>
                 <div style={{ position: "relative", height: 18 }}>
                   <div style={{ position: "absolute", left: "50%", top: -3, bottom: -3, width: 1, background: "var(--ink-muted)" }} />
@@ -98,7 +89,6 @@ export function SkillChart({ skills }: { skills: SkillStat[] }) {
                       left: delta >= 0 ? "50%" : `${50 - w}%`,
                       width: `${w}%`,
                       background: delta >= 0 ? "var(--above)" : "var(--below)",
-                      opacity: thin ? 0.4 : 1,
                       borderRadius: delta >= 0 ? "0 4px 4px 0" : "4px 0 0 4px", //round the data end only
                       transformOrigin: delta >= 0 ? "left" : "right",
                     }}
@@ -109,9 +99,8 @@ export function SkillChart({ skills }: { skills: SkillStat[] }) {
             );
           })}
           <div className="legend">
-            <span><i style={{ background: "var(--above)" }} />Luckier than fair</span>
-            <span><i style={{ background: "var(--below)" }} />Unluckier than fair</span>
-            <span><i style={{ background: "var(--ink-muted)", opacity: 0.4 }} />Faded: under {MIN_ROLLS} rolls</span>
+            <span><i style={{ background: "var(--above)" }} />Luckier than average</span>
+            <span><i style={{ background: "var(--below)" }} />Unluckier than average</span>
           </div>
         </div>
       )}

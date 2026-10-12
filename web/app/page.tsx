@@ -57,16 +57,21 @@ export default function Home() {
           <span className="home-die-caption">&amp; counting</span>
         </div>
         <div>
-          <div className="home-eyebrow">
-            <span className="eyebrow">D&amp;D roll analytics</span>
-          </div>
           <h1 className="home-title">Calculated Strike</h1>
-          <motion.hr
+          {/* longsword divider: pommel, grip, crossguard, then a slim blade tapering to the point; drawn in hilt -> tip */}
+          <motion.svg
             className="home-rule"
-            initial={{ scaleX: 0 }}
-            animate={{ scaleX: 1 }}
+            viewBox="0 0 760 20"
+            role="presentation"
+            initial={{ clipPath: "inset(0 100% 0 0)" }}
+            animate={{ clipPath: "inset(0 0% 0 0)" }}
             transition={{ duration: 0.9, ease: EASE, delay: 0.2 }}
-          />
+          >
+            <path d="M2 10 L6 6 L10 10 L6 14 Z" /> {/* diamond pommel */}
+            <rect x="10" y="9" width="24" height="2" /> {/* grip */}
+            <rect x="35" y="1" width="2" height="18" rx="1" /> {/* crossguard */}
+            <polygon points="38,8 700,9 752,10 700,11 38,12" /> {/* blade */}
+          </motion.svg>
           <p className="home-desc">
             A live-service statistical analysis tool that ingests virtual tabletop D&amp;D dice rolls and crunches
             metrics for my characters. Beta Version 1.2. Next update: Upload your own data for your own characters!
@@ -170,7 +175,7 @@ function Panel({
     <motion.div
       className="panel-wrap"
       initial={{ opacity: 0, y: 24 }}
-      animate={{ opacity: 1, y: 0, scale: isActive ? 1.04 : 1 }} //scale from centre: grows in place, neighbours stay put
+      animate={{ opacity: 1, y: 0, scale: isActive ? 1.04 : 1 }} //scale from center: grows in place, neighbours stay put
       transition={{ duration: 0.5, ease: EASE, delay: isActive ? 0 : delay, scale: { duration: 0.3, ease: EASE } }}
       style={{ zIndex: isActive ? 2 : 1 }} //grown panel sits over its neighbours' edges
     >
@@ -278,7 +283,7 @@ function CharacterInfo({ c }: { c: CharacterCard }) {
           )}
         </dl>
       )}
-      <Link href={`/character/${c.id}`} className="info-hint info-link">Open full breakdown →</Link>
+      <p className="info-hint">Click character card for full breakdown</p>
     </>
   );
 }

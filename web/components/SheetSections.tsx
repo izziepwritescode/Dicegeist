@@ -128,7 +128,7 @@ export function SheetKpis({ sheet }: { sheet: CharacterSheet }) {
       <StatTile label="Spells Cast" value={k.spellsCast} sub={`${fmt(k.spellDamage)} spell damage`} />
       {k.healHP !== null && (
         //roll20 healing logs are incomplete -> tile left off entirely for roll20 characters
-        <StatTile label="Healing (HP)" value={k.healHP} sub={<>{k.heals} heals{k.tempHP ? <><br />+{fmt(k.tempHP)} temp HP</> : null}</>} />
+        <StatTile label="Healing (HP)" value={k.healHP + (k.tempHP ?? 0) /* temp HP counted in the total */} sub={`${k.heals} heals`} />
       )}
       <StatTile label="Avg d20" value={k.avgD20} decimals={2} sub={k.expectedD20 === null ? undefined : `expected ${k.expectedD20.toFixed(2)}`} />
     </div>
@@ -145,11 +145,11 @@ export function AbilitiesArray({ abilities }: { abilities: SheetAbility[] }) {
     <div className="card">
       <div className="section-head">
         <div>
-          <h2>Abilities</h2>
+          <h2>Ability Scores</h2>
           <p>
             Score and modifier, then how the d20 has treated each ability: the average natural roll (before modifiers) next to
-            10.5, what a fair d20 averages. &ldquo;1.2 above fair&rdquo; means the die has landed 1.2 higher than a fair one would,
-            per roll on average. From {fmt(rolls)} ability checks, skills and initiative (initiative counts as DEX); saving
+            10.5, the average for a d20. &ldquo;1.2 above average&rdquo; means the die has landed 1.2 higher than average,
+            per roll. From {fmt(rolls)} ability checks, skills and initiative (initiative counts as DEX); saving
             throws are left out.
           </p>
         </div>
@@ -187,7 +187,7 @@ export function AbilitiesArray({ abilities }: { abilities: SheetAbility[] }) {
                 {a.rolls > 0 && (
                   //points on the d20, not a percent: avg natural roll minus 10.5
                   <div className="abil-vs" style={{ color: d >= 0 && !thin ? "var(--accent)" : "var(--ink-2)" }}>
-                    {Math.abs(d) < 0.05 ? "right on fair" : `${Math.abs(d).toFixed(1)} ${d > 0 ? "above" : "below"} fair`}
+                    {Math.abs(d) < 0.05 ? "right on average" : `${Math.abs(d).toFixed(1)} ${d > 0 ? "above" : "below"} average`}
                   </div>
                 )}
               </div>
@@ -204,27 +204,19 @@ export function AbilitiesArray({ abilities }: { abilities: SheetAbility[] }) {
 //params: attacks (CharacterSheet["attacks"]); total / hits (number)
 //output: JSX.Element
 export function AttackSplit({ attacks, total, hits }: { attacks: CharacterSheet["attacks"]; total: number; hits: number }) {
-  const b = attacks.basis;
-  //how each hit was decided, only the parts that apply
-  const basis = [
-    b.loggedAC && `${b.loggedAC} vs the AC Foundry logged`,
-    b.damageEvidence && `${b.damageEvidence} from damage rolled after the attack`,
-    b.slider && `${b.slider} vs the assumed AC`,
-  ].filter(Boolean).join(", ");
   return (
     <div className="card">
       <div className="section-head">
         <div>
           <h2>Attacks: Hit vs. Miss</h2>
-          <p>{total} attack rolls{basis && ` · ${basis}`}</p>
         </div>
       </div>
       {total ? (
         <>
           <SplitBar
             parts={[
-              { value: hits, color: "var(--good)", label: `${hits} hit · ${pct(hits, total, 0)}`, ink: "var(--on-accent)" },
-              { value: total - hits, color: "var(--critical)", label: `${total - hits} miss` },
+              { value: hits, color: "var(--good)", label: `${hits} hit · ${pct(hits, total, 0)}`, ink: "var(--on-good)" },
+              { value: total - hits, color: "var(--critical)", label: `${total - hits} miss · ${pct(total - hits, total, 0)}`, ink: "var(--on-critical)" },
             ]}
           />
           {attacks.sources.map((s) => (
@@ -234,7 +226,7 @@ export function AttackSplit({ attacks, total, hits }: { attacks: CharacterSheet[
               value={s.hits}
               max={s.attacks}
               color="var(--good)"
-              rest="color-mix(in srgb, var(--critical) 70%, transparent)" //unfilled track = misses
+              rest="color-mix(in srgb, var(--critical) 75%, transparent)" //unfilled track = misses
               right={`${s.hits}/${s.attacks} · ${pct(s.hits, s.attacks, 0)}`}
             />
           ))}
@@ -282,7 +274,7 @@ export function DamageByType({ types: rows }: { types: CharacterSheet["damageTyp
       <div className="section-head">
         <div>
           <h2>Damage by Type</h2>
-          <p>{fmt(total)} damage across {fmt(rolls)} rolls with a damage type</p>
+          <p>{fmt(total)} damage across {fmt(rolls)} rolls</p>
         </div>
       </div>
       {total ? (
@@ -373,7 +365,7 @@ export function SpellsCast({ levels, spells, total, byLevel = false }: { levels:
                   value: l.casts,
                   color: levelColor(l.level!, top),
                   label: `${l.level ? `Level ${l.level}` : "Cantrip"} ${pct(l.casts, n, 0)}`, //legend dropped, the table below names each level
-                  ink: "var(--c1)",
+                  ink: l.level! / top > 0.75 ? "#ffffff" : "var(--c1)", //white on the deep shades
                 }))}
               />
             </div>
@@ -564,10 +556,12 @@ function levelLabel(lo: number | null, hi: number | null): string {
   return lo === hi ? String(lo) : `${lo}–${hi}`; //upcast spells show their range
 }
 
-// level -> accent strength: cantrips lightest, top level full accent
+// level -> step along the hit colour: cantrips pale, middle levels full colour, top level deep shade
 //params: level (number); top (number) - highest level cast
 //output: string - css colour
 function levelColor(level: number, top: number): string {
-  const strength = 35 + Math.round((65 * level) / top); //35%..100% accent over the light ramp step
-  return `color-mix(in srgb, var(--accent) ${strength}%, var(--c5))`;
+  const t = top ? level / top : 0; //0..1 position, like a percent rank
+  return t <= 0.5
+    ? `color-mix(in srgb, var(--good) ${Math.round(30 + 140 * t)}%, #ffffff)` //30%..100% colour over white
+    : `color-mix(in srgb, var(--good) ${Math.round(100 - 90 * (t - 0.5))}%, #000000)`; //100%..55% colour over black
 }
