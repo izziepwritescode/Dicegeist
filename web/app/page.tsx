@@ -207,6 +207,7 @@ function InfoPanel({ rows, active, pulse }: { rows: CharacterCard[]; active: Cha
       <AnimatePresence mode="wait">
         <motion.div
           key={active?.id ?? "totals"} //new key -> old content fades out, new fades in
+          className="info-body"
           initial={{ opacity: 0, y: 8 }}
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: -8 }}
@@ -230,17 +231,17 @@ function NetTotals({ rows }: { rows: CharacterCard[] }) {
     rows.some((r) => r[k] !== null) ? rows.reduce((a, r) => a + (r[k] ?? 0), 0) : null; //all blank -> blank, not 0
   return (
     <>
-      <div className="eyebrow">All characters</div>
-      <h2 className="info-title">Net totals</h2>
+      <div className="eyebrow">All Characters</div>
+      <h2 className="info-title">Net Totals</h2>
       <StatGrid
         stats={[
-          ["d20s rolled", d20s, 0],
+          ["d20s Rolled", d20s, 0],
           ["Average d20", avg, 2],
           ["Natural 20s", rows.reduce((a, r) => a + r.nat20s, 0), 0],
           ["Natural 1s", rows.reduce((a, r) => a + r.nat1s, 0), 0],
           ["Attacks", sum("attacks"), 0],
-          ["Spells cast", sum("spellsCast"), 0],
-          ["Total damage", sum("totalDamage"), 0],
+          ["Spells Cast", sum("spellsCast"), 0],
+          ["Total Damage", sum("totalDamage"), 0],
         ]}
       />
       <p className="info-hint">Click for expanded stats</p>
@@ -263,17 +264,17 @@ function CharacterInfo({ c }: { c: CharacterCard }) {
           ["Natural 20s", c.nat20s, 0],
           ["Natural 1s", c.nat1s, 0],
           ["Attacks", c.attacks, 0],
-          ["Spells cast", c.spellsCast, 0],
-          ["Total damage", c.totalDamage, 0],
+          ["Spells Cast", c.spellsCast, 0],
+          ["Total Damage", c.totalDamage, 0],
         ]}
       />
       {(c.bestSkill || c.worstSkill) && (
         <dl className="info-skills">
           {c.bestSkill && (
-            <div><dt>Luckiest skill</dt><dd>{c.bestSkill.name} <span>{c.bestSkill.avgD20.toFixed(2)}</span></dd></div>
+            <div><dt>Luckiest Skill</dt><dd>{c.bestSkill.name} <span>{c.bestSkill.avgD20.toFixed(2)}</span></dd></div>
           )}
           {c.worstSkill && (
-            <div><dt>Unluckiest skill</dt><dd>{c.worstSkill.name} <span>{c.worstSkill.avgD20.toFixed(2)}</span></dd></div>
+            <div><dt>Unluckiest Skill</dt><dd>{c.worstSkill.name} <span>{c.worstSkill.avgD20.toFixed(2)}</span></dd></div>
           )}
         </dl>
       )}

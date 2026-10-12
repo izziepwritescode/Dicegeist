@@ -235,10 +235,10 @@ Home v2: header, character panels, info panel
 .home-rule { border: 0; height: 2px; background: linear-gradient(90deg, var(--accent), transparent); transform-origin: left; margin-bottom: 14px; max-width: 520px; }
 .home-desc { color: var(--ink-2); max-width: 60ch; }
 
-.home-body { display: grid; grid-template-columns: minmax(0, 1fr) 340px; gap: 24px; align-items: start; }
+.home-body { --panel-h: 412px; display: grid; grid-template-columns: minmax(0, 1fr) 340px; gap: 24px; align-items: start; } /* --panel-h: card height, shared by the info panel */
 
 /* panels: groups side by side, each group = panels + bracket */
-.panel-strip { display: flex; gap: 20px; min-height: 440px; }
+.panel-strip { display: flex; gap: 20px; min-height: calc(var(--panel-h) + 28px); } /* +28px = bracket under the cards */
 .panel-group { display: flex; flex-direction: column; flex-basis: 0; min-width: 0; }
 .panel-row { display: flex; gap: 12px; flex: 1; }
 .panel-wrap { flex: 1 1 0; min-width: 0; display: flex; }
@@ -274,23 +274,24 @@ Home v2: header, character panels, info panel
 }
 
 /* info panel */
-.info-panel { position: relative; min-height: 400px; border-radius: 6px; background: var(--surface-2); transition: background-color 0.4s var(--ease), color 0.4s var(--ease); }
-.info-title { font-size: 1.6rem; margin: 4px 0 14px; }
-.info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 18px 12px; margin: 10px 0 16px; }
+.info-body { flex: 1; display: flex; flex-direction: column; min-height: 0; } /* fills the panel so the hint sits at the foot */
+.info-panel { position: relative; height: var(--panel-h); overflow: hidden; display: flex; flex-direction: column; border-radius: 6px; background: var(--surface-2); transition: background-color 0.4s var(--ease), color 0.4s var(--ease); }
+.info-title { font-size: 1.45rem; margin: 2px 0 6px; }
+.info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px 12px; margin: 6px 0 12px; }
 .info-wide { grid-column: 1 / -1; } /* odd last stat spans both columns */
-.info-value { font-size: 1.6rem; font-weight: 700; line-height: 1.1; font-variant-numeric: tabular-nums; color: var(--metric); }
+.info-value { font-size: 1.4rem; font-weight: 700; line-height: 1.1; font-variant-numeric: tabular-nums; color: var(--metric); }
 .info-label { font-size: 0.8rem; color: var(--ink-2); }
-.info-skills { display: grid; gap: 8px; margin: 4px 0 16px; font-size: 0.875rem; }
+.info-skills { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 0 0 10px; font-size: 0.875rem; } /* luckiest | unluckiest side by side */
 .info-skills dt { font-size: 0.75rem; color: var(--ink-muted); text-transform: uppercase; letter-spacing: 0.06em; }
 .info-skills dd span { color: var(--ink-2); font-variant-numeric: tabular-nums; margin-left: 4px; }
-.info-hint { font-size: 0.8rem; color: var(--ink-muted); }
+.info-hint { font-size: 0.8rem; color: var(--ink-muted); margin-top: auto; } /* pinned to the panel foot */
 .info-link { display: inline-block; color: var(--accent); }
 .info-link:hover { text-decoration: underline; }
 
 /* tablet: info panel drops below the panels */
 @media (max-width: 900px) {
   .home-body { grid-template-columns: 1fr; }
-  .info-panel { min-height: 0; }
+  .info-panel { height: auto; }
 }
 
 /* phone: panels become horizontal strips, groups stacked */

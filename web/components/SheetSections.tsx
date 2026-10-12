@@ -120,12 +120,12 @@ export function SheetKpis({ sheet }: { sheet: CharacterSheet }) {
   const k = sheet.kpis;
   return (
     <div className="stats-row stats-row-8 stats-strip" style={{ "--tiles": k.healHP === null ? 7 : 8 } as React.CSSProperties}>
-      <StatTile label="Total rolls" value={k.rolls} sub={`${fmt(k.d20s)} with a d20`} />
+      <StatTile label="Total Rolls" value={k.rolls} sub={`${fmt(k.d20s)} with a d20`} />
       <StatTile label="Natural 20s" value={k.nat20s} sub={`${pct(k.nat20s, k.d20s)} (fair 5%)`} />
       <StatTile label="Natural 1s" value={k.nat1s} sub={`${pct(k.nat1s, k.d20s)} (fair 5%)`} />
       <StatTile label="Attacks" value={k.attacks} sub={`${pct(k.hits, k.attacks, 0)} hit rate`} />
-      <StatTile label="Total damage" value={k.damage} sub={`${pct(k.spellDamage, k.damage, 0)} from spells`} />
-      <StatTile label="Spells cast" value={k.spellsCast} sub={`${fmt(k.spellDamage)} spell damage`} />
+      <StatTile label="Total Damage" value={k.damage} sub={`${pct(k.spellDamage, k.damage, 0)} from spells`} />
+      <StatTile label="Spells Cast" value={k.spellsCast} sub={`${fmt(k.spellDamage)} spell damage`} />
       {k.healHP !== null && (
         //roll20 healing logs are incomplete -> tile left off entirely for roll20 characters
         <StatTile label="Healing (HP)" value={k.healHP} sub={<>{k.heals} heals{k.tempHP ? <><br />+{fmt(k.tempHP)} temp HP</> : null}</>} />
@@ -215,7 +215,7 @@ export function AttackSplit({ attacks, total, hits }: { attacks: CharacterSheet[
     <div className="card">
       <div className="section-head">
         <div>
-          <h2>Attacks: hit vs miss</h2>
+          <h2>Attacks: Hit vs. Miss</h2>
           <p>{total} attack rolls{basis && ` · ${basis}`}</p>
         </div>
       </div>
@@ -281,7 +281,7 @@ export function DamageByType({ types: rows }: { types: CharacterSheet["damageTyp
     <div className="card">
       <div className="section-head">
         <div>
-          <h2>Damage by type</h2>
+          <h2>Damage by Type</h2>
           <p>{fmt(total)} damage across {fmt(rolls)} rolls with a damage type</p>
         </div>
       </div>
@@ -321,7 +321,7 @@ export function SpellVsWeapon({ total, spell, damage }: { total: number; spell: 
     <div className="card">
       <div className="section-head">
         <div>
-          <h2>Spell vs weapon damage</h2>
+          <h2>Spell vs. Weapon Damage</h2>
           <p>Spell attacks and Divine Smite count as spell damage</p>
         </div>
       </div>
@@ -333,7 +333,7 @@ export function SpellVsWeapon({ total, spell, damage }: { total: number; spell: 
       />
       <Legend items={[[`Spell ${fmt(spell)}`, "var(--accent)"], [`Weapon / other ${fmt(weapon)}`, "var(--c5)"]]} />
 
-      <h3 className="sub-head">Average damage per roll</h3>
+      <h3 className="sub-head">Average Damage per Roll</h3>
       <p className="card-note">
         Biggest single roll: {damage.biggest ?? "–"}. Dice luck {damage.diceLuck?.toFixed(3) ?? "–"} (1.000 = dice rolled exactly average)
       </p>
@@ -356,7 +356,7 @@ export function SpellsCast({ levels, spells, total, byLevel = false }: { levels:
     <div className="card">
       <div className="section-head">
         <div>
-          <h2>Spells cast</h2>
+          <h2>Spells Cast</h2>
           <p>Each spell attack roll counts as a cast (every beam or ray); other spells count once per damage or healing roll</p>
         </div>
       </div>
@@ -457,7 +457,7 @@ export function NightsChart({ nights }: { nights: SheetNight[] }) {
     <div className="card">
       <div className="section-head">
         <div>
-          <h2>Luck by play night</h2>
+          <h2>Luck by Play Night</h2>
           <p>Average natural d20 per night vs expected after advantage and disadvantage (dashed)</p>
         </div>
       </div>

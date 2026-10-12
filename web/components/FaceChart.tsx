@@ -64,7 +64,7 @@ export function FaceChart({ faces }: { faces: FaceStat[] }) {
     <div className="card">
       <div className="section-head">
         <div>
-          <h2>d20 distribution</h2>
+          <h2>d20 Faces Rolled: Total Distribution</h2>
           <p>{total.toLocaleString()} d20s, including dropped advantage dice. Fair die: 5% each.</p>
         </div>
         <button className="toggle" onClick={() => setTable((t) => !t)} aria-pressed={table}>
