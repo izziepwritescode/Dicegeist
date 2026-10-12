@@ -3,7 +3,7 @@
 //--------------------------------------------------------------------------------------------------------------
 // Outline
 //   Constants
-//     PLATFORM_LABEL / PLATFORM_ORDER
+//     PLATFORM_LABEL / PLATFORM_ORDER / SIL
 //   Page
 //     Home
 //   Pieces
@@ -35,6 +35,14 @@ import { paletteFor, themeVars } from "@/lib/themes"; //per-character colour ram
 const PLATFORM_LABEL: Record<string, string> = { roll20: "Roll20", foundry: "Foundry VTT" };
 const PLATFORM_ORDER = ["roll20", "foundry"]; //bracket order left -> right; unknown platforms go last
 const EASE = [0.22, 1, 0.36, 1] as const; //same curve as --ease in globals.css
+
+//hand-drawn silhouettes keyed by lowercase first name; bg = the drawing's own backdrop colour (files in web/public/art/sil)
+const SIL: Record<string, { src: string; bg: string }> = {
+  lazlo: { src: "/art/sil/lazlo.png", bg: "#422657" },
+  vasha: { src: "/art/sil/vasha.png", bg: "#57170e" },
+  idris: { src: "/art/sil/idris.png", bg: "#002458" },
+  ivan: { src: "/art/sil/ivan.png", bg: "#293600" },
+};
 
 //--------------------------------------------------------------------------------------------------------------
 //Page
@@ -162,6 +170,7 @@ function Panel({
 }) {
   const router = useRouter();
   const touch = useRef(false); //true when the current press came from a finger, not a mouse
+  const sil = SIL[firstName(c.name).toLowerCase()]; //undefined -> plain gradient panel with the vertical name
 
   //touch: first tap selects (shows info), second tap opens the page; mouse clicks navigate as normal
   const onClick = (e: React.MouseEvent) => {
@@ -181,8 +190,11 @@ function Panel({
     >
       <Link
         href={`/character/${c.id}`}
-        className={`panel ${isActive ? "is-active" : ""}`}
-        style={themeVars(c.name)} //character ramp + accent as local CSS vars
+        className={`panel ${sil ? "has-sil" : ""} ${isActive ? "is-active" : ""}`}
+        style={{
+          ...themeVars(c.name), //character ramp + accent as local CSS vars
+          ...(sil && { "--sil": `url(${sil.src})`, "--sil-bg": sil.bg }), //silhouette art + its backdrop colour
+        } as React.CSSProperties}
         onPointerDown={(e) => (touch.current = e.pointerType === "touch")}
         onMouseEnter={() => !touch.current && setActive(c.id)}
         onFocus={() => !touch.current && setActive(c.id)} //keyboard focus only; a tap also focuses, handled in onClick

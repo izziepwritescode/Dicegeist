@@ -236,7 +236,7 @@ Home v2: header, character panels, info panel
 .home-rule { display: block; width: 100%; max-width: 760px; height: auto; fill: var(--accent); margin: 2px 0 12px; } /* sword divider; scales with the title */
 .home-desc { color: var(--ink-2); max-width: 60ch; }
 
-.home-body { --panel-h: 412px; display: grid; grid-template-columns: minmax(0, 1fr) 340px; gap: 24px; align-items: start; } /* --panel-h: card height, shared by the info panel */
+.home-body { --panel-h: 371px; display: grid; grid-template-columns: minmax(0, 1fr) 340px; gap: 24px; align-items: start; } /* --panel-h: card height, shared by the info panel */
 
 /* panels: groups side by side, each group = panels + bracket */
 .panel-strip { display: flex; gap: 20px; min-height: calc(var(--panel-h) + 28px); } /* +28px = bracket under the cards */
@@ -247,7 +247,7 @@ Home v2: header, character panels, info panel
 /* panel fill = character ramp, light mid-tone at top fading to darkest at the foot; no outline */
 .panel {
   flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: space-between;
-  padding: 22px 8px 16px; min-height: 400px; color: #ffffff;
+  padding: 22px 8px 16px; color: #ffffff;
   background: linear-gradient(180deg, var(--c3, #3d5862) 0%, var(--c1, #14303a) 85%);
   border-radius: 6px; /* small bevel */
   box-shadow: 0 6px 18px -12px rgba(20, 48, 58, 0.5);
@@ -263,6 +263,19 @@ Home v2: header, character panels, info panel
 .panel-class { font-size: 1rem; font-weight: 800; color: var(--accent); } /* accent on darkest ramp step */
 .panel-campaign { font-size: 0.75rem; color: var(--c5); }
 
+/* silhouette cards: Izzie's drawing fills the card, the foot fades into the backdrop and carries name / class / campaign */
+.panel.has-sil {
+  position: relative; justify-content: flex-end; padding: 0 8px 14px;
+  background: var(--sil-bg) var(--sil) center top / cover no-repeat;
+}
+.panel.has-sil::before { /* fade band under the text */
+  content: ""; position: absolute; inset: auto 0 0 0; height: 46%; border-radius: inherit;
+  background: linear-gradient(180deg, transparent, var(--sil-bg) 52%);
+}
+.panel.has-sil > * { position: relative; } /* text above the fade */
+.panel.has-sil .panel-name { writing-mode: horizontal-tb; font-weight: 700; font-size: clamp(1.25rem, 2.1vw, 1.7rem); margin-bottom: 4px; }
+.panel.has-sil .panel-class { font-size: 0.85rem; line-height: 1.2; color: var(--good); } /* lifted accent: Vasha's teal reads on her red */
+
 /* bracket under each platform group: bottom border + end ticks, label centerd below */
 .panel-bracket {
   position: relative; height: 14px; margin: 14px 4px 0;
@@ -277,10 +290,10 @@ Home v2: header, character panels, info panel
 /* info panel */
 .info-body { flex: 1; display: flex; flex-direction: column; min-height: 0; } /* fills the panel so the hint sits at the foot */
 .info-panel { position: relative; height: var(--panel-h); overflow: hidden; display: flex; flex-direction: column; border-radius: 6px; background: var(--surface-2); transition: background-color 0.4s var(--ease), color 0.4s var(--ease); }
-.info-title { font-size: 1.45rem; margin: 2px 0 6px; }
-.info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px 12px; margin: 6px 0 12px; }
+.info-title { font-size: 1.3rem; margin: 0 0 4px; }
+.info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 7px 12px; margin: 4px 0 10px; }
 .info-wide { grid-column: 1 / -1; } /* odd last stat spans both columns */
-.info-value { font-size: 1.4rem; font-weight: 700; line-height: 1.1; font-variant-numeric: tabular-nums; color: var(--metric); }
+.info-value { font-size: 1.3rem; font-weight: 700; line-height: 1.1; font-variant-numeric: tabular-nums; color: var(--metric); }
 .info-label { font-size: 0.8rem; color: var(--ink-2); }
 .info-skills { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 0 0 10px; font-size: 0.875rem; } /* luckiest | unluckiest side by side */
 .info-skills dt { font-size: 0.75rem; color: var(--ink-muted); text-transform: uppercase; letter-spacing: 0.06em; }
@@ -306,6 +319,10 @@ Home v2: header, character panels, info panel
   .panel { flex-direction: row; min-height: 0; padding: 16px 18px; }
   .panel-name { writing-mode: horizontal-tb; font-size: 1.4rem; }
   .panel-foot { align-items: flex-end; text-align: right; }
+  .panel.has-sil { flex-direction: column; align-items: flex-start; justify-content: center; padding: 14px 18px; background-position: right 10px top 12%; background-size: 34% auto; } /* text left, figure's head and shoulders on the right */
+  .panel.has-sil::before { inset: 0; height: auto; background: linear-gradient(90deg, var(--sil-bg) 55%, transparent 80%); }
+  .panel.has-sil .panel-name { margin-bottom: 2px; }
+  .panel.has-sil .panel-foot { align-items: flex-start; text-align: left; }
 }
 
 /*--------------------------------------------------------------------------------------------------------------
