@@ -2,8 +2,6 @@
 // Usage Syntax: <SkillChart skills={detail.skills} />
 //--------------------------------------------------------------------------------------------------------------
 // Outline
-//   Constants
-//     MIN_ROLLS
 //   Chart
 //     SkillChart
 //--------------------------------------------------------------------------------------------------------------
@@ -14,12 +12,6 @@ import { motion } from "motion/react"; //bar grow-in animation
 import { useState } from "react";
 import type { SkillStat } from "@/lib/data";
 import { FAIR_D20 } from "./ui";
-
-//--------------------------------------------------------------------------------------------------------------
-//Constants
-//--------------------------------------------------------------------------------------------------------------
-
-const MIN_ROLLS = 5; //below this, an average is mostly noise -> bar drawn faded
 
 //--------------------------------------------------------------------------------------------------------------
 //Chart
@@ -74,7 +66,6 @@ export function SkillChart({ skills }: { skills: SkillStat[] }) {
           {rows.map((s, i) => {
             const delta = (s.avgD20 ?? FAIR_D20) - FAIR_D20;
             const w = (Math.abs(delta) / span) * 50; //% of track; half the track each side
-            const thin = s.rollCount < MIN_ROLLS;
             return (
               <div
                 key={s.code ?? "none"}
@@ -98,7 +89,6 @@ export function SkillChart({ skills }: { skills: SkillStat[] }) {
                       left: delta >= 0 ? "50%" : `${50 - w}%`,
                       width: `${w}%`,
                       background: delta >= 0 ? "var(--above)" : "var(--below)",
-                      opacity: thin ? 0.4 : 1,
                       borderRadius: delta >= 0 ? "0 4px 4px 0" : "4px 0 0 4px", //round the data end only
                       transformOrigin: delta >= 0 ? "left" : "right",
                     }}
@@ -109,9 +99,8 @@ export function SkillChart({ skills }: { skills: SkillStat[] }) {
             );
           })}
           <div className="legend">
-            <span><i style={{ background: "var(--above)" }} />Luckier than fair</span>
-            <span><i style={{ background: "var(--below)" }} />Unluckier than fair</span>
-            <span><i style={{ background: "var(--ink-muted)", opacity: 0.4 }} />Faded: under {MIN_ROLLS} rolls</span>
+            <span><i style={{ background: "var(--above)" }} />Luckier than average</span>
+            <span><i style={{ background: "var(--below)" }} />Unluckier than average</span>
           </div>
         </div>
       )}
