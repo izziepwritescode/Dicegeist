@@ -68,8 +68,8 @@ export default function Home() {
             transition={{ duration: 0.9, ease: EASE, delay: 0.2 }}
           />
           <p className="home-desc">
-            Every die rolled across my online campaigns, bulk-imported from Roll20 and Foundry and crunched per
-            character and per skill. A fair d20 averages 10.5. Anything else is the dice gods playing favourites.
+            A live-service statistical analysis tool that ingests virtual tabletop D&amp;D dice rolls and crunches
+            metrics for my characters. Beta Version 1.2. Next update: Upload your own data for your own characters!
           </p>
         </div>
       </section>
