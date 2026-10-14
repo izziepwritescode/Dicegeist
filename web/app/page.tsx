@@ -19,7 +19,6 @@
 "use client";
 
 import Link from "next/link"; //client-side navigation
-import { useRouter } from "next/navigation"; //navigate on second tap (phones)
 import { AnimatePresence, motion } from "motion/react"; //panel entrance + info crossfade
 import { useRef, useState } from "react";
 import { fetchCharacters, type CharacterCard } from "@/lib/data"; //Supabase reads
@@ -48,7 +47,7 @@ const SIL: Record<string, { src: string; bg: string }> = {
 //Page
 //--------------------------------------------------------------------------------------------------------------
 
-// header + panels + info panel; active = hovered (desktop) or tapped (phone) character id
+// header + panels + info panel; active = hovered or keyboard-focused character id (a tap opens the page)
 //output: JSX.Element
 export default function Home() {
   const { data, error, pulse } = useLive(fetchCharacters, []); //still auto-refreshes, no live badge shown
@@ -168,17 +167,8 @@ function Panel({
   isActive: boolean;
   setActive: (id: number | null) => void;
 }) {
-  const router = useRouter();
   const touch = useRef(false); //true when the current press came from a finger, not a mouse
   const sil = SIL[firstName(c.name).toLowerCase()]; //undefined -> plain gradient panel with the vertical name
-
-  //touch: first tap selects (shows info), second tap opens the page; mouse clicks navigate as normal
-  const onClick = (e: React.MouseEvent) => {
-    if (!touch.current) return;
-    e.preventDefault();
-    if (isActive) router.push(`/character/${c.id}`);
-    else setActive(c.id);
-  };
 
   return (
     <motion.div
@@ -197,8 +187,7 @@ function Panel({
         } as React.CSSProperties}
         onPointerDown={(e) => (touch.current = e.pointerType === "touch")}
         onMouseEnter={() => !touch.current && setActive(c.id)}
-        onFocus={() => !touch.current && setActive(c.id)} //keyboard focus only; a tap also focuses, handled in onClick
-        onClick={onClick}
+        onFocus={() => !touch.current && setActive(c.id)} //keyboard focus only; a tap goes straight to the character page
         aria-label={`${c.name}, ${c.className ?? "character"}, average d20 ${c.avgD20 ?? "n/a"}`}
       >
         <span className="panel-name">{firstName(c.name)}</span>
