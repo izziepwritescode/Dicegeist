@@ -36,11 +36,11 @@ const PLATFORM_ORDER = ["roll20", "foundry"]; //bracket order left -> right; unk
 const EASE = [0.22, 1, 0.36, 1] as const; //same curve as --ease in globals.css
 
 //hand-drawn silhouettes keyed by lowercase first name; bg = the drawing's own backdrop colour (files in web/public/art/sil)
-const SIL: Record<string, { src: string; bg: string }> = {
-  lazlo: { src: "/art/sil/lazlo.png", bg: "#422657" },
-  vasha: { src: "/art/sil/vasha.png", bg: "#57170e" },
-  idris: { src: "/art/sil/idris.png", bg: "#002458" },
-  ivan: { src: "/art/sil/ivan.png", bg: "#293600" },
+const SIL: Record<string, { src: string; cut: string; bg: string }> = { //src = card art, cut = full transparent cutout (phone strips)
+  lazlo: { src: "/art/sil/lazlo.png", cut: "/art/sil/cut/lazlo.png", bg: "#422657" },
+  vasha: { src: "/art/sil/vasha.png", cut: "/art/sil/cut/vasha.png", bg: "#57170e" },
+  idris: { src: "/art/sil/idris.png", cut: "/art/sil/cut/idris.png", bg: "#002458" },
+  ivan: { src: "/art/sil/ivan.png", cut: "/art/sil/cut/ivan.png", bg: "#293600" },
 };
 
 //--------------------------------------------------------------------------------------------------------------
@@ -183,7 +183,7 @@ function Panel({
         className={`panel ${sil ? "has-sil" : ""} ${isActive ? "is-active" : ""}`}
         style={{
           ...themeVars(c.name), //character ramp + accent as local CSS vars
-          ...(sil && { "--sil": `url(${sil.src})`, "--sil-bg": sil.bg }), //silhouette art + its backdrop colour
+          ...(sil && { "--sil": `url(${sil.src})`, "--sil-cut": `url(${sil.cut})`, "--sil-bg": sil.bg }), //card art, phone cutout + backdrop colour
         } as React.CSSProperties}
         onPointerDown={(e) => (touch.current = e.pointerType === "touch")}
         onMouseEnter={() => !touch.current && setActive(c.id)}

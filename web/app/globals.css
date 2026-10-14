@@ -319,8 +319,8 @@ Home v2: header, character panels, info panel
   .panel { flex-direction: row; min-height: 0; padding: 16px 18px; }
   .panel-name { writing-mode: horizontal-tb; font-size: 1.4rem; }
   .panel-foot { align-items: flex-end; text-align: right; }
-  .panel.has-sil { flex-direction: column; align-items: flex-start; justify-content: center; padding: 14px 18px; background-position: right 10px top 12%; background-size: 34% auto; } /* text left, figure's head and shoulders on the right */
-  .panel.has-sil::before { inset: 0; height: auto; background: linear-gradient(90deg, var(--sil-bg) 55%, transparent 80%); }
+  .panel.has-sil { flex-direction: column; align-items: flex-start; justify-content: center; padding: 14px 18px; background: var(--sil-bg) var(--sil-cut) right 18px center / auto 90% no-repeat; } /* text left; whole cutout figure on the right, nothing clipped */
+  .panel.has-sil::before { display: none; } /* cutout has its own empty space, no fade needed */
   .panel.has-sil .panel-name { margin-bottom: 2px; }
   .panel.has-sil .panel-foot { align-items: flex-start; text-align: left; }
 }
