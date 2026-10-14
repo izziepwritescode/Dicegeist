@@ -139,19 +139,12 @@ export function SheetKpis({ sheet }: { sheet: CharacterSheet }) {
 //params: abilities (SheetAbility[]) - STR..CHA order
 //output: JSX.Element
 export function AbilitiesArray({ abilities }: { abilities: SheetAbility[] }) {
-  const rolls = abilities.reduce((a, x) => a + x.rolls, 0);
   const pos = (v: number) => Math.min(100, Math.max(0, ((v - 8.5) / 4) * 100)); //zoomed 8.5..12.5, same range as the home luck meter
   return (
     <div className="card">
       <div className="section-head">
         <div>
           <h2>Ability Scores</h2>
-          <p>
-            Score and modifier, then how the d20 has treated each ability: the average natural roll (before modifiers) next to
-            10.5, the average for a d20. &ldquo;1.2 above average&rdquo; means the die has landed 1.2 higher than average,
-            per roll. From {fmt(rolls)} ability checks, skills and initiative (initiative counts as DEX); saving
-            throws are left out.
-          </p>
         </div>
       </div>
       <div className="abil-grid">

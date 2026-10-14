@@ -3,7 +3,7 @@
 //--------------------------------------------------------------------------------------------------------------
 // Outline
 //   Constants
-//     PLATFORM_LABEL / PLATFORM_ORDER
+//     PLATFORM_LABEL / PLATFORM_ORDER / SIL
 //   Page
 //     Home
 //   Pieces
@@ -19,7 +19,6 @@
 "use client";
 
 import Link from "next/link"; //client-side navigation
-import { useRouter } from "next/navigation"; //navigate on second tap (phones)
 import { AnimatePresence, motion } from "motion/react"; //panel entrance + info crossfade
 import { useRef, useState } from "react";
 import { fetchCharacters, type CharacterCard } from "@/lib/data"; //Supabase reads
@@ -36,11 +35,19 @@ const PLATFORM_LABEL: Record<string, string> = { roll20: "Roll20", foundry: "Fou
 const PLATFORM_ORDER = ["roll20", "foundry"]; //bracket order left -> right; unknown platforms go last
 const EASE = [0.22, 1, 0.36, 1] as const; //same curve as --ease in globals.css
 
+//hand-drawn silhouettes keyed by lowercase first name; bg = the drawing's own backdrop colour (files in web/public/art/sil)
+const SIL: Record<string, { src: string; cut: string; bg: string }> = { //src = card art, cut = full transparent cutout (phone strips)
+  lazlo: { src: "/art/sil/lazlo.png", cut: "/art/sil/cut/lazlo.png", bg: "#422657" },
+  vasha: { src: "/art/sil/vasha.png", cut: "/art/sil/cut/vasha.png", bg: "#57170e" },
+  idris: { src: "/art/sil/idris.png", cut: "/art/sil/cut/idris.png", bg: "#002458" },
+  ivan: { src: "/art/sil/ivan.png", cut: "/art/sil/cut/ivan.png", bg: "#293600" },
+};
+
 //--------------------------------------------------------------------------------------------------------------
 //Page
 //--------------------------------------------------------------------------------------------------------------
 
-// header + panels + info panel; active = hovered (desktop) or tapped (phone) character id
+// header + panels + info panel; active = hovered or keyboard-focused character id (a tap opens the page)
 //output: JSX.Element
 export default function Home() {
   const { data, error, pulse } = useLive(fetchCharacters, []); //still auto-refreshes, no live badge shown
@@ -160,16 +167,8 @@ function Panel({
   isActive: boolean;
   setActive: (id: number | null) => void;
 }) {
-  const router = useRouter();
   const touch = useRef(false); //true when the current press came from a finger, not a mouse
-
-  //touch: first tap selects (shows info), second tap opens the page; mouse clicks navigate as normal
-  const onClick = (e: React.MouseEvent) => {
-    if (!touch.current) return;
-    e.preventDefault();
-    if (isActive) router.push(`/character/${c.id}`);
-    else setActive(c.id);
-  };
+  const sil = SIL[firstName(c.name).toLowerCase()]; //undefined -> plain gradient panel with the vertical name
 
   return (
     <motion.div
@@ -181,12 +180,14 @@ function Panel({
     >
       <Link
         href={`/character/${c.id}`}
-        className={`panel ${isActive ? "is-active" : ""}`}
-        style={themeVars(c.name)} //character ramp + accent as local CSS vars
+        className={`panel ${sil ? "has-sil" : ""} ${isActive ? "is-active" : ""}`}
+        style={{
+          ...themeVars(c.name), //character ramp + accent as local CSS vars
+          ...(sil && { "--sil": `url(${sil.src})`, "--sil-cut": `url(${sil.cut})`, "--sil-bg": sil.bg }), //card art, phone cutout + backdrop colour
+        } as React.CSSProperties}
         onPointerDown={(e) => (touch.current = e.pointerType === "touch")}
         onMouseEnter={() => !touch.current && setActive(c.id)}
-        onFocus={() => !touch.current && setActive(c.id)} //keyboard focus only; a tap also focuses, handled in onClick
-        onClick={onClick}
+        onFocus={() => !touch.current && setActive(c.id)} //keyboard focus only; a tap goes straight to the character page
         aria-label={`${c.name}, ${c.className ?? "character"}, average d20 ${c.avgD20 ?? "n/a"}`}
       >
         <span className="panel-name">{firstName(c.name)}</span>
