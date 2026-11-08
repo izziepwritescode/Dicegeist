@@ -3,7 +3,7 @@
 //--------------------------------------------------------------------------------------------------------------
 // Outline
 //   Fonts
-//     inter / fraunces
+//     inter / fraunces / bebas / blackletter
 //   Metadata
 //     metadata
 //   Layout
@@ -11,7 +11,7 @@
 //--------------------------------------------------------------------------------------------------------------
 
 import type { Metadata } from "next"; //page <head> typing
-import { Bebas_Neue, Fraunces, Inter } from "next/font/google"; //self-hosted Google fonts, no layout shift
+import { Bebas_Neue, Fraunces, Inter, Manufacturing_Consent } from "next/font/google"; //self-hosted Google fonts, no layout shift
 import { MotionRoot } from "@/components/MotionRoot"; //honours OS reduce-motion for every animation
 import { isDemo } from "@/lib/data"; //true when Supabase env vars are missing
 import "./globals.css";
@@ -23,6 +23,7 @@ import "./globals.css";
 const inter = Inter({ variable: "--font-inter", subsets: ["latin"] });
 const fraunces = Fraunces({ variable: "--font-fraunces", subsets: ["latin"] });
 const bebas = Bebas_Neue({ variable: "--font-poster", weight: "400", subsets: ["latin", "latin-ext"] }); //tall condensed caps, character page names
+const blackletter = Manufacturing_Consent({ variable: "--font-blackletter", weight: "400", subsets: ["latin"] }); //home page title only
 
 //--------------------------------------------------------------------------------------------------------------
 //Metadata (browser tab + link previews on socials)
@@ -43,7 +44,7 @@ export const metadata: Metadata = {
 //output: JSX.Element - <html> document
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="en" className={`${inter.variable} ${fraunces.variable} ${bebas.variable}`}>
+    <html lang="en" className={`${inter.variable} ${fraunces.variable} ${bebas.variable} ${blackletter.variable}`}>
       <body>
         {isDemo && (
           <div className="demo-banner">
