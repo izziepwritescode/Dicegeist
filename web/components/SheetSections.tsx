@@ -442,14 +442,14 @@ export function NightsChart({ nights }: { nights: SheetNight[] }) {
     <div className="card">
       <div className="section-head">
         <div>
-          <h2>Luck by Play Night</h2>
-          <p>Average natural d20 per night vs expected after advantage and disadvantage (dashed)</p>
+          <h2>Luck by Session</h2>
+          <p>Average natural d20 per session vs expected after advantage and disadvantage (dashed)</p>
         </div>
       </div>
       {pts.length ? (
         <>
           <div ref={wrap} className="chart-wrap">
-            <svg className="chart" width={W} height={NH} role="img" aria-label="Average d20 per play night" onMouseLeave={() => setHover(null)}>
+            <svg className="chart" width={W} height={NH} role="img" aria-label="Average d20 per session" onMouseLeave={() => setHover(null)}>
               {[1, 5.5, 10.5, 15.5, 20].map((t) => (
                 <g key={t}>
                   <line x1={NPAD.left} x2={W - NPAD.right} y1={y(t)} y2={y(t)} stroke="var(--grid)" />
@@ -492,14 +492,14 @@ export function NightsChart({ nights }: { nights: SheetNight[] }) {
           <div className="nights">
             {best && (
               <div className="night">
-                <div className="night-k">Best night (5+ d20s)</div>
+                <div className="night-k">Best session (5+ d20s)</div>
                 <div className="night-d" style={{ color: "var(--good)" }}>{best.date}</div>
                 <div className="night-k">avg {best.avgD20} over {best.d20s} d20s · {best.nat20s} nat 20s</div>
               </div>
             )}
             {worst && (
               <div className="night">
-                <div className="night-k">Worst night (5+ d20s)</div>
+                <div className="night-k">Worst session (5+ d20s)</div>
                 <div className="night-d" style={{ color: "var(--critical)" }}>{worst.date}</div>
                 <div className="night-k">avg {worst.avgD20} over {worst.d20s} d20s · {worst.nat1s} nat 1s</div>
               </div>
