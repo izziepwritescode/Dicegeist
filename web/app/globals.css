@@ -263,7 +263,7 @@ Home v2: header, character panels, info panel
 .panel-class { font-size: 1rem; font-weight: 800; color: var(--accent); } /* accent on darkest ramp step */
 .panel-campaign { font-size: 0.75rem; color: var(--c5); }
 
-/* silhouette cards: Izzie's drawing fills the card, the foot fades into the backdrop and carries name / class / campaign */
+/* silhouette cards: the hand-drawn silhouette fills the card, the foot fades into the backdrop and carries name / class / campaign */
 .panel.has-sil {
   position: relative; justify-content: flex-end; padding: 0 8px 14px;
   background: var(--sil-bg) var(--sil) center top / cover no-repeat;

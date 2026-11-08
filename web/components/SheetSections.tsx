@@ -35,7 +35,7 @@ const DAMAGE_COLORS: Record<string, string> = {
   Bludgeoning: "#a68a6d", //brown
   Cold:        "#a6ecff", //ice
   Fire:        "#f5973a", //orange
-  Force:       "#e5484d", //red (Izzie's pick)
+  Force:       "#e5484d", //red
   Lightning:   "#7fb2ff", //electric blue
   Necrotic:    "#4a8f86", //murky teal-green
   Piercing:    "#c4ccd6", //steel

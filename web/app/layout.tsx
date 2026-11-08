@@ -54,7 +54,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
           <main className="shell">{children}</main>
         </MotionRoot>
         <footer className="site-footer shell">
-          Built by Izzie · rolls imported from Roll20 and Foundry VTT · data live from Supabase
+          Rolls imported from Roll20 and Foundry VTT · data live from Supabase
         </footer>
       </body>
     </html>
