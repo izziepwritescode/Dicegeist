@@ -18,7 +18,7 @@
 import { useEffect } from "react"; //apply / undo theme on mount / unmount
 
 //--------------------------------------------------------------------------------------------------------------
-//Palettes (sampled from Izzie's palette sheet)
+//Palettes (sampled from the palette sheet)
 //--------------------------------------------------------------------------------------------------------------
 
 export const MAIN = ["#d2e3ea", "#b2cfd5", "#9bbbc6"]; //light -> dark band, home page
