@@ -415,7 +415,7 @@ Character sheet sections (components/SheetSections.tsx); colours all come from t
   font-size: clamp(4.5rem, 12.5vw, 10.5rem); line-height: 0.8; letter-spacing: 0.01em; margin: 0; color: #fff;
 }
 .char-head-side { padding-bottom: 0.2rem; }
-.char-head-last { font-family: var(--font-poster), var(--font-sans); font-weight: 400; font-size: clamp(1.6rem, 3.4vw, 2.5rem); line-height: 0.9; letter-spacing: 0.02em; color: #fff; } /* same poster face as the first name, a step up from the class line so it reads as the surname */
+.char-head-last { font-family: var(--font-poster), var(--font-sans); font-weight: 400; font-size: clamp(1.76rem, 3.74vw, 2.75rem); line-height: 0.9; letter-spacing: 0.02em; color: #fff; } /* same poster face as the first name, a step up from the class line so it reads as the surname */
 .char-head-class { margin-top: 6px; font-weight: 800; font-size: clamp(1rem, 2vw, 1.4rem); letter-spacing: 0.06em; text-transform: uppercase; }
 .char-head-meta { display: flex; flex-wrap: wrap; row-gap: 4px; margin-top: 14px; font-size: 0.85rem; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; }
 .char-head-meta span + span { border-left: 1px solid rgba(255, 255, 255, 0.7); margin-left: 12px; padding-left: 12px; }
